@@ -49,7 +49,7 @@ class TemperaturaFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.temperaturas, color='blue')  # Cambiar a gráfica de barras
+        self.ax.bar(self.tiempo, self.temperaturas, color='blue')
         self.ax.set_title("Temperatura en el tiempo")
         self.ax.set_xlabel("Tiempo (s)")
         self.ax.set_ylabel("Temperatura (°C)")

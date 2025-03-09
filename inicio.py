@@ -4,12 +4,12 @@ from temperatura import TemperaturaFrame  # Importar la clase TemperaturaFrame d
 from humedad import HumedadFrame  # Importar la clase HumedadFrame de humedad.py
 
 app = CTk()
-app.geometry("1200x600")  # Tamaño más grande para acomodar 5 gráficas
+app.geometry("1200x600")
 app.title("SmartGrow")
 
 # Crear el Navbar
 navbar = Navbar(app)
-navbar.pack(fill="x", side="top")  # Colocar el Navbar en la parte superior
+navbar.pack(fill="x", side="top")
 
 # Crear un frame para contener el canvas
 frame = CTkFrame(app)
@@ -23,7 +23,7 @@ temperatura_frame.grid(row=0, column=0, padx=5, pady=5)
 humedad_frame = HumedadFrame(frame)
 humedad_frame.grid(row=0, column=1, padx=5, pady=5)
 
-frame.grid_columnconfigure(0, weight=0)  # No expandir la columna
-frame.grid_rowconfigure(0, weight=0)  # No expandir la fila
+frame.grid_columnconfigure(0, weight=0)
+frame.grid_rowconfigure(0, weight=0)
 
 app.mainloop()

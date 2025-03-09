@@ -49,11 +49,10 @@ class HumedadFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.humedades, color='green')  # Cambiar a gráfica de barras
+        self.ax.bar(self.tiempo, self.humedades, color='green')
         self.ax.set_title("Humedad en el tiempo")
         self.ax.set_xlabel("Tiempo (s)")
         self.ax.set_ylabel("Humedad (%)")
         self.canvas.draw()
         
-        # Llamar a esta función nuevamente después de 1 segundo
         self.after(10000, self.actualizar_humedad)

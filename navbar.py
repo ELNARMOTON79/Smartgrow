@@ -6,7 +6,7 @@ class Navbar(CTkFrame):  # Usar CTkFrame en lugar de Frame de tkinter
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.pack(fill="x")  # Expandir el Navbar horizontalmente
+        self.pack(fill="x")
 
         self.create_widgets()
 
@@ -16,49 +16,39 @@ class Navbar(CTkFrame):  # Usar CTkFrame en lugar de Frame de tkinter
             self, 
             text="Home", 
             command=self.home, 
-            fg_color="#228B22",  # Color de fondo verde
-            hover_color="#32CD32"  # Color más claro cuando se pasa el mouse
+            fg_color="#228B22",
+            hover_color="#32CD32"
         )
-        self.home.pack(side="left", padx=10, pady=10)  # Añadir padding para mejor espaciado
+        self.home.pack(side="left", padx=10, pady=10)
 
         # Botón History
         self.about = CTkButton(
             self, 
             text="History", 
             command=self.about, 
-            fg_color="#228B22",  # Color de fondo verde
-            hover_color="#32CD32"  # Color más claro cuando se pasa el mouse
+            fg_color="#228B22",
+            hover_color="#32CD32"
         )
-        self.about.pack(side="left", padx=10, pady=10)  # Añadir padding para mejor espaciado
+        self.about.pack(side="left", padx=10, pady=10)
 
         # Botón Settings
         self.contact = CTkButton(
             self, 
             text="Settings", 
             command=self.contact, 
-            fg_color="#228B22",  # Color de fondo verde
-            hover_color="#32CD32"  # Color más claro cuando se pasa el mouse
+            fg_color="#228B22",  
+            hover_color="#32CD32"  
         )
-        self.contact.pack(side="left", padx=10, pady=10)  # Añadir padding para mejor espaciado
+        self.contact.pack(side="left", padx=10, pady=10)
 
         # Espacio flexible para empujar la imagen hacia la derecha
         self.spacer = CTkLabel(self, text="", width=1)
         self.spacer.pack(side="left", fill="x", expand=True)
 
         # Cargar la imagen .png o .gif usando tkinter.PhotoImage
-        self.logo_image = tk.PhotoImage(file="Sources/logo.png")  # Cambia la ruta a tu imagen
-        # Redimensionar la imagen (opcional, si es necesario)
-        self.logo_image = self.logo_image.subsample(2, 2)  # Reducir el tamaño a la mitad
+        self.logo_image = tk.PhotoImage(file="Sources/logo.png")
+        self.logo_image = self.logo_image.subsample(2, 2)
 
         # Mostrar la imagen en un CTkLabel
         self.logo_label = CTkLabel(self, image=self.logo_image, text="")
-        self.logo_label.pack(side="right", padx=10, pady=10)  # Colocar la imagen a la derecha
-
-    def home(self):
-        print("Home")
-
-    def about(self):
-        print("About")
-
-    def contact(self):
-        print("Contact")
+        self.logo_label.pack(side="right", padx=10, pady=10)
