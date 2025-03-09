@@ -1,6 +1,7 @@
 from customtkinter import *
 from navbar import Navbar  # Importar la clase Navbar de navbar.py
 from temperatura import TemperaturaFrame  # Importar la clase TemperaturaFrame de temperatura.py
+from humedad import HumedadFrame  # Importar la clase HumedadFrame de humedad.py
 
 app = CTk()
 app.geometry("1200x600")  # Tamaño más grande para acomodar 5 gráficas
@@ -18,8 +19,8 @@ frame.pack(fill="both", expand=True)
 temperatura_frame = TemperaturaFrame(frame)
 temperatura_frame.grid(row=0, column=0, padx=5, pady=5)
 
-#Crear un frame para la humedad
-humedad_frame = CTkFrame(frame)
+# Crear un frame para la humedad
+humedad_frame = HumedadFrame(frame)
 humedad_frame.grid(row=0, column=1, padx=5, pady=5)
 
 frame.grid_columnconfigure(0, weight=0)  # No expandir la columna
