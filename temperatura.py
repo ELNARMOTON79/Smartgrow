@@ -9,22 +9,24 @@ class TemperaturaFrame(CTkFrame):
         super().__init__(master, **kwargs)
         
         # Configurar el frame
-        self.configure(fg_color="gray", border_width=0, height=300, width=400)
+        self.configure(fg_color="#FFFFFF", border_width=2, border_color="#228B22", height=280, width=580)  # Tamaño ajustado
+        self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor de la temperatura
-        self.temperatura_label = CTkLabel(self, text="Temperatura: --°C", font=("Arial", 16))
+        self.temperatura_label = CTkLabel(self, text="Temperatura: --°C", font=("Arial", 16), text_color="#000000")
         self.temperatura_label.pack(pady=10)
         
         # Crear una figura de matplotlib
-        self.fig, self.ax = plt.subplots(figsize=(4, 2))
-        self.ax.set_title("Temperatura en el tiempo")
-        self.ax.set_xlabel("Tiempo (s)")
-        self.ax.set_ylabel("Temperatura (°C)")
+        self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
+        self.ax.set_title("Temperatura en el tiempo", color="#000000")
+        self.ax.set_xlabel("Tiempo (s)", color="#000000")
+        self.ax.set_ylabel("Temperatura (°C)", color="#000000")
+        self.ax.tick_params(colors="#000000")
         
         # Crear un canvas para la gráfica
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Inicializar datos de la gráfica
         self.tiempo = list(range(10))
@@ -49,10 +51,11 @@ class TemperaturaFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.temperaturas, color='blue')
-        self.ax.set_title("Temperatura en el tiempo")
-        self.ax.set_xlabel("Tiempo (s)")
-        self.ax.set_ylabel("Temperatura (°C)")
+        self.ax.bar(self.tiempo, self.temperaturas, color='#1E90FF')  # Azul moderno
+        self.ax.set_title("Temperatura en el tiempo", color="#000000")
+        self.ax.set_xlabel("Tiempo (s)", color="#000000")
+        self.ax.set_ylabel("Temperatura (°C)", color="#000000")
+        self.ax.tick_params(colors="#000000")
         self.canvas.draw()
         
         # Llamar a esta función nuevamente después de 1 segundo

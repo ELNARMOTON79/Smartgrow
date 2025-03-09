@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import random
 
-class HumedadFrame(CTkFrame):
+class AguaFrame(CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         
@@ -12,15 +12,15 @@ class HumedadFrame(CTkFrame):
         self.configure(fg_color="#FFFFFF", border_width=2, border_color="#228B22", height=280, width=580)  # Tamaño ajustado
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
-        # Crear un label para mostrar el valor de la humedad
-        self.humedad_label = CTkLabel(self, text="Humedad: --%", font=("Arial", 16), text_color="#000000")
-        self.humedad_label.pack(pady=10)
+        # Crear un label para mostrar el valor del nivel de agua
+        self.agua_label = CTkLabel(self, text="Nivel de Agua: --%", font=("Arial", 16), text_color="#000000")
+        self.agua_label.pack(pady=10)
         
         # Crear una figura de matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
-        self.ax.set_title("Humedad en el tiempo", color="#000000")
+        self.ax.set_title("Nivel de Agua en el tiempo", color="#000000")
         self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Humedad (%)", color="#000000")
+        self.ax.set_ylabel("Nivel de Agua (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         
         # Crear un canvas para la gráfica
@@ -30,33 +30,33 @@ class HumedadFrame(CTkFrame):
         
         # Inicializar datos de la gráfica
         self.tiempo = list(range(10))
-        self.humedades = [random.randint(40, 80) for _ in range(10)]
+        self.agua_values = [random.randint(50, 100) for _ in range(10)]
         
-        # Actualizar la gráfica y el valor de la humedad
-        self.actualizar_humedad()
+        # Actualizar la gráfica y el valor del nivel de agua
+        self.actualizar_agua()
 
-    def actualizar_humedad(self):
-        # Simular un nuevo valor de humedad
-        nueva_humedad = random.randint(40, 80)
-        self.humedades.append(nueva_humedad)
+    def actualizar_agua(self):
+        # Simular un nuevo valor de nivel de agua
+        nuevo_agua = random.randint(50, 100)
+        self.agua_values.append(nuevo_agua)
         self.tiempo.append(self.tiempo[-1] + 1)
         
         # Limitar el número de puntos en la gráfica
         if len(self.tiempo) > 20:
             self.tiempo.pop(0)
-            self.humedades.pop(0)
+            self.agua_values.pop(0)
         
-        # Actualizar el label con el valor de la humedad
-        self.humedad_label.configure(text=f"Humedad: {nueva_humedad}%")
+        # Actualizar el label con el valor del nivel de agua
+        self.agua_label.configure(text=f"Nivel de Agua: {nuevo_agua}%")
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.humedades, color='#32CD32')  # Verde claro
-        self.ax.set_title("Humedad en el tiempo", color="#000000")
+        self.ax.bar(self.tiempo, self.agua_values, color='#00CED1')  # Turquesa
+        self.ax.set_title("Nivel de Agua en el tiempo", color="#000000")
         self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Humedad (%)", color="#000000")
+        self.ax.set_ylabel("Nivel de Agua (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         self.canvas.draw()
         
         # Llamar a esta función nuevamente después de 1 segundo
-        self.after(10000, self.actualizar_humedad)
+        self.after(10000, self.actualizar_agua)
