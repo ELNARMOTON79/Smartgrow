@@ -8,6 +8,8 @@ app = CTk()
 app.geometry("1200x600")  # Tamaño fijo para la pantalla
 app.title("SmartGrow - Monitoreo Hidropónico")
 
+app.iconbitmap("Sources/logo.ico")
+
 # Crear el Navbar
 navbar = Navbar(app)
 navbar.pack(fill="x", side="top")
