@@ -14,7 +14,7 @@ navbar = Navbar(app)
 navbar.pack(fill="x", side="top")
 
 # Crear un frame principal para contener las métricas
-main_frame = CTkFrame(app, fg_color="#F0F0F0")  # Fondo gris claro
+main_frame = CTkFrame(app, fg_color="#CFF4D2")  # Fondo verde claro
 main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
 # Crear frames para cada métrica

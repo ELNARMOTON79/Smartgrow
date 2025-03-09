@@ -3,7 +3,7 @@ import tkinter as tk
 
 class Navbar(CTkFrame):
     def __init__(self, master=None):
-        super().__init__(master, fg_color="#228B22")  # Fondo verde oscuro
+        super().__init__(master, fg_color="#32909C")  # Fondo verde azulado
         self.master = master
         self.pack(fill="x")
 
@@ -15,8 +15,8 @@ class Navbar(CTkFrame):
             self,
             text="Home",
             command=self.home,
-            fg_color="#32CD32",  # Verde claro
-            hover_color="#228B22",  # Verde oscuro al pasar el mouse
+            fg_color="#56C596",  # Verde claro
+            hover_color="#32909C",  # Verde azulado al pasar el mouse
             font=("Arial", 14, "bold")
         )
         self.home.pack(side="left", padx=10, pady=10)
@@ -26,8 +26,8 @@ class Navbar(CTkFrame):
             self,
             text="History",
             command=self.about,
-            fg_color="#32CD32",
-            hover_color="#228B22",
+            fg_color="#56C596",
+            hover_color="#32909C",
             font=("Arial", 14, "bold")
         )
         self.about.pack(side="left", padx=10, pady=10)
@@ -37,8 +37,8 @@ class Navbar(CTkFrame):
             self,
             text="Settings",
             command=self.contact,
-            fg_color="#32CD32",
-            hover_color="#228B22",
+            fg_color="#56C596",
+            hover_color="#32909C",
             font=("Arial", 14, "bold")
         )
         self.contact.pack(side="left", padx=10, pady=10)

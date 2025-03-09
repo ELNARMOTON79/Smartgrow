@@ -9,7 +9,7 @@ class TemperaturaFrame(CTkFrame):
         super().__init__(master, **kwargs)
         
         # Configurar el frame
-        self.configure(fg_color="#FFFFFF", border_width=2, border_color="#228B22", height=280, width=580)  # Tamaño ajustado
+        self.configure(fg_color="#FFFFFF", border_width=2, border_color="#32909C", height=280, width=580)  # Tamaño ajustado
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor de la temperatura
@@ -51,7 +51,7 @@ class TemperaturaFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.temperaturas, color='#1E90FF')  # Azul moderno
+        self.ax.bar(self.tiempo, self.temperaturas, color='#205072')  # Azul oscuro
         self.ax.set_title("Temperatura en el tiempo", color="#000000")
         self.ax.set_xlabel("Tiempo (s)", color="#000000")
         self.ax.set_ylabel("Temperatura (°C)", color="#000000")

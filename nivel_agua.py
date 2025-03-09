@@ -9,7 +9,7 @@ class AguaFrame(CTkFrame):
         super().__init__(master, **kwargs)
         
         # Configurar el frame
-        self.configure(fg_color="#FFFFFF", border_width=2, border_color="#228B22", height=280, width=580)  # Tamaño ajustado
+        self.configure(fg_color="#FFFFFF", border_width=2, border_color="#32909C", height=280, width=580)  # Tamaño ajustado
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor del nivel de agua
@@ -51,7 +51,7 @@ class AguaFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.agua_values, color='#00CED1')  # Turquesa
+        self.ax.bar(self.tiempo, self.agua_values, color='#32909C')  # Verde azulado
         self.ax.set_title("Nivel de Agua en el tiempo", color="#000000")
         self.ax.set_xlabel("Tiempo (s)", color="#000000")
         self.ax.set_ylabel("Nivel de Agua (%)", color="#000000")
