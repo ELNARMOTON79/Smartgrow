@@ -10,9 +10,7 @@ def conectar():
 
 def cerrar(conexion):
     conexion.close()
-    print('Conexión cerrada')
 
 if __name__ == '__main__':
     conexion = conectar()
-    print("Conexión exitosa")
     cerrar(conexion)
