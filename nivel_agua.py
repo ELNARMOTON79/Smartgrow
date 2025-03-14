@@ -13,14 +13,13 @@ class AguaFrame(CTkFrame):
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor del nivel de agua
-        self.agua_label = CTkLabel(self, text="Nivel de Agua: --%", font=("Arial", 16), text_color="#000000")
+        self.agua_label = CTkLabel(self, text="Water Level: --%", font=("Arial", 16), text_color="#000000")
         self.agua_label.pack(pady=10)
         
         # Crear una figura de matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
-        self.ax.set_title("Nivel de Agua en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Nivel de Agua (%)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Water Level (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         
         # Crear un canvas para la gráfica
@@ -47,14 +46,13 @@ class AguaFrame(CTkFrame):
             self.agua_values.pop(0)
         
         # Actualizar el label con el valor del nivel de agua
-        self.agua_label.configure(text=f"Nivel de Agua: {nuevo_agua}%")
+        self.agua_label.configure(text=f"Water Level: {nuevo_agua}%")
         
         # Actualizar la gráfica
         self.ax.clear()
         self.ax.bar(self.tiempo, self.agua_values, color='#32909C')  # Verde azulado
-        self.ax.set_title("Nivel de Agua en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Nivel de Agua (%)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Water Level (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         self.canvas.draw()
         

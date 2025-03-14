@@ -13,14 +13,13 @@ class HumedadFrame(CTkFrame):
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor de la humedad
-        self.humedad_label = CTkLabel(self, text="Humedad: --%", font=("Arial", 16), text_color="#000000")
+        self.humedad_label = CTkLabel(self, text="Humidity: --%", font=("Arial", 16), text_color="#000000")
         self.humedad_label.pack(pady=10)
         
         # Crear una figura de matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
-        self.ax.set_title("Humedad en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Humedad (%)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Humidity (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         
         # Crear un canvas para la gráfica
@@ -52,9 +51,8 @@ class HumedadFrame(CTkFrame):
         # Actualizar la gráfica
         self.ax.clear()
         self.ax.bar(self.tiempo, self.humedades, color='#56C596')  # Verde claro
-        self.ax.set_title("Humedad en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Humedad (%)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Humidity (%)", color="#000000")
         self.ax.tick_params(colors="#000000")
         self.canvas.draw()
         

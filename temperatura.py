@@ -18,9 +18,8 @@ class TemperaturaFrame(CTkFrame):
         
         # Crear una figura de matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
-        self.ax.set_title("Temperatura en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Temperatura (°C)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Temperature (°C)", color="#000000")
         self.ax.tick_params(colors="#000000")
         
         # Crear un canvas para la gráfica
@@ -47,14 +46,13 @@ class TemperaturaFrame(CTkFrame):
             self.temperaturas.pop(0)
         
         # Actualizar el label con el valor de la temperatura
-        self.temperatura_label.configure(text=f"Temperatura: {nueva_temperatura}°C")
+        self.temperatura_label.configure(text=f"Temperature: {nueva_temperatura}°C")
         
         # Actualizar la gráfica
         self.ax.clear()
         self.ax.bar(self.tiempo, self.temperaturas, color='#205072')  # Azul oscuro
-        self.ax.set_title("Temperatura en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
-        self.ax.set_ylabel("Temperatura (°C)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
+        self.ax.set_ylabel("Temperature (°C)", color="#000000")
         self.ax.tick_params(colors="#000000")
         self.canvas.draw()
         

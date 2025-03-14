@@ -18,8 +18,7 @@ class PHFrame(CTkFrame):
         
         # Crear una figura de matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="#F0F0F0")
-        self.ax.set_title("pH en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
+        self.ax.set_xlabel("Time (s)", color="#000000")
         self.ax.set_ylabel("pH", color="#000000")
         self.ax.tick_params(colors="#000000")
         
@@ -51,9 +50,8 @@ class PHFrame(CTkFrame):
         
         # Actualizar la gráfica
         self.ax.clear()
-        self.ax.bar(self.tiempo, self.ph_values, color='#78E495')  # Verde claro
-        self.ax.set_title("pH en el tiempo", color="#000000")
-        self.ax.set_xlabel("Tiempo (s)", color="#000000")
+        self.ax.bar(self.tiempo, self.ph_values, color='#78E495')
+        self.ax.set_xlabel("Time (s)", color="#000000")
         self.ax.set_ylabel("pH", color="#000000")
         self.ax.tick_params(colors="#000000")
         self.canvas.draw()

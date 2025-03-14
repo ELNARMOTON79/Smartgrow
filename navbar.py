@@ -10,6 +10,11 @@ class Navbar(CTkFrame):
         self.create_widgets()
 
     def create_widgets(self):
+        # Cargar imágenes de los iconos
+        self.home_icon = tk.PhotoImage(file="Sources/home.png").subsample(18, 18)
+        self.history_icon = tk.PhotoImage(file="Sources/history.png").subsample(18, 18)
+        self.settings_icon = tk.PhotoImage(file="Sources/setting.png").subsample(18, 18)
+
         # Botón Home
         self.home = CTkButton(
             self,
@@ -17,7 +22,9 @@ class Navbar(CTkFrame):
             command=self.home,
             fg_color="#56C596",  # Verde claro
             hover_color="#32909C",  # Verde azulado al pasar el mouse
-            font=("Arial", 14, "bold")
+            font=("Arial", 14, "bold"),
+            image=self.home_icon,  # Icono para Home
+            compound="left"  # Colocar el icono a la izquierda del texto
         )
         self.home.pack(side="left", padx=10, pady=10)
 
@@ -28,7 +35,9 @@ class Navbar(CTkFrame):
             command=self.about,
             fg_color="#56C596",
             hover_color="#32909C",
-            font=("Arial", 14, "bold")
+            font=("Arial", 14, "bold"),
+            image=self.history_icon,  # Icono para History
+            compound="left"
         )
         self.about.pack(side="left", padx=10, pady=10)
 
@@ -39,7 +48,9 @@ class Navbar(CTkFrame):
             command=self.contact,
             fg_color="#56C596",
             hover_color="#32909C",
-            font=("Arial", 14, "bold")
+            font=("Arial", 14, "bold"),
+            image=self.settings_icon,  # Icono para Settings
+            compound="left"
         )
         self.contact.pack(side="left", padx=10, pady=10)
 

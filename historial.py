@@ -9,9 +9,13 @@ class historial(CTkFrame):
         self.main_frame = CTkFrame(self, fg_color="#CFF4D2")  # Fondo verde claro
         self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
+        # Título "History"
+        self.title_label = CTkLabel(self.main_frame, text="History", font=("Arial", 20, "bold"), text_color="#32909C")
+        self.title_label.pack(pady=(10, 5))  # Espaciado superior
+
         # Crear un frame con bordes redondeados para la tabla
         self.table_frame = CTkFrame(self.main_frame, fg_color="#FFFFFF", corner_radius=15)  # Fondo blanco con bordes redondeados
-        self.table_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        self.table_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # Datos de la tabla
         value = [
