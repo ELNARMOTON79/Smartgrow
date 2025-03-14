@@ -8,7 +8,7 @@ app = CTk()
 app.geometry("1200x600")  # Tamaño fijo para la pantalla
 app.title("SmartGrow - Hydroponic System")
 
-app.iconbitmap("Sources/logo.ico")
+#app.iconbitmap("Sources/logo.ico")
 
 # Crear el Navbar
 navbar = Navbar(app)
