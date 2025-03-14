@@ -34,7 +34,6 @@ class historial(CTkFrame):
             values=value,  # Datos de la tabla
             header_color="#56C596",  # Color de fondo del encabezado
             colors=["#E8F5E9", "#FFFFFF"],  # Colores alternos para las filas
-            hover_color="#32909C",  # Color al pasar el mouse
             font=("Arial", 14),  # Fuente y tamaño del texto
             text_color="black",  # Color del texto
             corner_radius=10  # Bordes redondeados para las celdas
