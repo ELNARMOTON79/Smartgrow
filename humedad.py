@@ -46,7 +46,7 @@ class HumedadFrame(CTkFrame):
             self.humedades.pop(0)
         
         # Actualizar el label con el valor de la humedad
-        self.humedad_label.configure(text=f"Humedad: {nueva_humedad}%")
+        self.humedad_label.configure(text=f"Humidity: {nueva_humedad}%")
         
         # Actualizar la gráfica
         self.ax.clear()
