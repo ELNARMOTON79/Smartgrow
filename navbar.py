@@ -1,5 +1,6 @@
 from customtkinter import *
 import tkinter as tk
+import os
 
 class Navbar(CTkFrame):
     def __init__(self, master=None):
@@ -11,9 +12,10 @@ class Navbar(CTkFrame):
 
     def create_widgets(self):
         # Cargar imágenes de los iconos
-        self.home_icon = tk.PhotoImage(file="Sources/home.png").subsample(18, 18)
-        self.history_icon = tk.PhotoImage(file="Sources/history.png").subsample(18, 18)
-        self.settings_icon = tk.PhotoImage(file="Sources/setting.png").subsample(18, 18)
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener el directorio actual
+        self.home_icon = tk.PhotoImage(file=os.path.join(base_dir, "Sources", "home.png")).subsample(18, 18)
+        self.history_icon = tk.PhotoImage(file=os.path.join(base_dir, "Sources", "history.png")).subsample(18, 18)
+        self.settings_icon = tk.PhotoImage(file=os.path.join(base_dir, "Sources", "setting.png")).subsample(18, 18)
 
         # Botón Home
         self.home = CTkButton(
@@ -59,7 +61,7 @@ class Navbar(CTkFrame):
         self.spacer.pack(side="left", fill="x", expand=True)
 
         # Cargar la imagen del logo
-        self.logo_image = tk.PhotoImage(file="Sources/logo.png")
+        self.logo_image = tk.PhotoImage(file=os.path.join(base_dir, "Sources", "logo.png"))
         self.logo_image = self.logo_image.subsample(2, 2)  # Reducir el tamaño a la mitad
 
         # Mostrar la imagen en un CTkLabel

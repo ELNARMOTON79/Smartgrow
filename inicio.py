@@ -1,14 +1,20 @@
 from customtkinter import *
+import tkinter as tk
 from navbar import Navbar
 from monitoreo import monitoreo
 from historial import historial
 from configuracion import Configuracion
+import os
 
 app = CTk()
 app.geometry("1200x600")  # Tamaño fijo para la pantalla
 app.title("SmartGrow - Hydroponic System")
 
-#app.iconbitmap("Sources/logo.ico")
+# Cargar el ícono de la ventana (compatible con Linux y Windows)
+base_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener el directorio actual
+icon_path = os.path.join(base_dir, "Sources", "logo.png")  # Ruta al ícono en formato PNG
+if os.path.exists(icon_path):
+    app.iconphoto(True, tk.PhotoImage(file=icon_path))  # Cargar el ícono en formato PNG
 
 # Crear el Navbar
 navbar = Navbar(app)

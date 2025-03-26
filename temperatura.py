@@ -13,7 +13,7 @@ class TemperaturaFrame(CTkFrame):
         self.pack_propagate(False)  # Evitar que el frame cambie de tamaño
         
         # Crear un label para mostrar el valor de la temperatura
-        self.temperatura_label = CTkLabel(self, text="Temperatura: --°C", font=("Arial", 16), text_color="#000000")
+        self.temperatura_label = CTkLabel(self, text="Temperature: --°C", font=("Arial", 16), text_color="#000000")
         self.temperatura_label.pack(pady=10)
         
         # Crear una figura de matplotlib
