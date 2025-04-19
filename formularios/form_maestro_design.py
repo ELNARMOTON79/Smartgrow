@@ -3,27 +3,30 @@ from tkinter import font
 from config import COLOR_BARRA_SUPERIOR, COLOR_MENU_LATERAL, COLOR_CUERPO_PRINCIPAL, COLOR_MENU_CURSOR_ENCIMA
 import util.util_ventana as util_ventana
 import util.util_imagenes as util_img
-
+# Nuevo
+from formularios.form_graficas_design import FormularioGraficasDesign
+from formularios.form_sitio_construccion import FormularioSitioConstruccionDesign
+from formularios.form_info_design import FormularioInfoDesign
 
 class FormularioMaestroDesign(tk.Tk):
-
 
     def __init__(self):
         super().__init__()
         self.logo = util_img.leer_imagen("./imagenes/logo.png", (560, 136))
         self.perfil = util_img.leer_imagen("./imagenes/Perfil.png", (100, 100))
+        self.img_sitio_construccion = util_img.leer_imagen("./imagenes/sitio_construccion.png", (200, 200))
         self.config_window()
         self.paneles()
         self.controles_barra_superior()        
         self.controles_menu_lateral()
         self.controles_cuerpo()
-
-    def config_window(self): 
+    
+    def config_window(self):
         # Configuración inicial de la ventana
         self.title('Python GUI')
         self.iconbitmap("./imagenes/logo.ico")
         w, h = 1024, 600        
-        util_ventana.centrar_ventana(self, w, h)     
+        util_ventana.centrar_ventana(self, w, h)        
 
     def paneles(self):        
          # Crear paneles: barra superior, menú lateral y cuerpo principal
@@ -50,7 +53,7 @@ class FormularioMaestroDesign(tk.Tk):
 
         # Botón del menú lateral
         self.buttonMenuLateral = tk.Button(self.barra_superior, text="\uf0c9", font=font_awesome,
-                                    command=self.toggle_panel, bd=0, bg=COLOR_BARRA_SUPERIOR, fg="white")
+                                           command=self.toggle_panel, bd=0, bg=COLOR_BARRA_SUPERIOR, fg="white")
         self.buttonMenuLateral.pack(side=tk.LEFT)
 
         # Etiqueta de informacion
@@ -80,25 +83,26 @@ class FormularioMaestroDesign(tk.Tk):
         self.buttonSettings = tk.Button(self.menu_lateral)
 
         buttons_info = [
-            ("Dashboard", "\uf109", self.buttonDashBoard),
-            ("Profile", "\uf007", self.buttonProfile),
-            ("Picture", "\uf03e", self.buttonPicture),
-            ("Info", "\uf129", self.buttonInfo),
-            ("Settings", "\uf013", self.buttonSettings)
+            ("Dashboard", "\uf109", self.buttonDashBoard,self.abrir_panel_graficas ),
+            ("Profile", "\uf007", self.buttonProfile,self.abrir_panel_en_construccion),
+            ("Picture", "\uf03e", self.buttonPicture,self.abrir_panel_en_construccion),
+            ("Info", "\uf129", self.buttonInfo,self.abrir_panel_info),
+            ("Settings", "\uf013", self.buttonSettings,self.abrir_panel_en_construccion)
         ]
 
-        for text, icon, button in buttons_info:
-            self.configurar_boton_menu(button, text, icon, font_awesome, ancho_menu, alto_menu)                    
+        for text, icon, button,comando in buttons_info:
+            self.configurar_boton_menu(button, text, icon, font_awesome, ancho_menu, alto_menu,comando)                    
     
     def controles_cuerpo(self):
         # Imagen en el cuerpo principal
         label = tk.Label(self.cuerpo_principal, image=self.logo,
                          bg=COLOR_CUERPO_PRINCIPAL)
-        label.place(x=0, y=0, relwidth=1, relheight=1)
-
-    def configurar_boton_menu(self, button, text, icon, font_awesome, ancho_menu, alto_menu):
+        label.place(x=0, y=0, relwidth=1, relheight=1)        
+  
+    def configurar_boton_menu(self, button, text, icon, font_awesome, ancho_menu, alto_menu, comando):
         button.config(text=f"  {icon}    {text}", anchor="w", font=font_awesome,
-                      bd=0, bg=COLOR_MENU_LATERAL, fg="white", width=ancho_menu, height=alto_menu)
+                      bd=0, bg=COLOR_MENU_LATERAL, fg="white", width=ancho_menu, height=alto_menu,
+                      command = comando)
         button.pack(side=tk.TOP)
         self.bind_hover_events(button)
 
@@ -121,3 +125,19 @@ class FormularioMaestroDesign(tk.Tk):
             self.menu_lateral.pack_forget()
         else:
             self.menu_lateral.pack(side=tk.LEFT, fill='y')
+    # Nuevo
+    def abrir_panel_graficas(self):   
+        self.limpiar_panel(self.cuerpo_principal)     
+        FormularioGraficasDesign(self.cuerpo_principal)   
+        
+    def abrir_panel_en_construccion(self):   
+        self.limpiar_panel(self.cuerpo_principal)     
+        FormularioSitioConstruccionDesign(self.cuerpo_principal,self.img_sitio_construccion) 
+
+    def abrir_panel_info(self):           
+        FormularioInfoDesign()                    
+
+    def limpiar_panel(self,panel):
+    # Función para limpiar el contenido del panel
+        for widget in panel.winfo_children():
+            widget.destroy()
