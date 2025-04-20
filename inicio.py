@@ -1,50 +1,72 @@
 from customtkinter import *
+from theme_manager import ThemeManager
+import tkinter as tk
+import os
 from navbar import Navbar
-from monitoreo import monitoreo
-from historial import historial
-from configuracion import Configuracion
+from PIL import Image
+from customtkinter import CTkImage
 
+# Establecer modo por defecto
+set_appearance_mode("light")
+
+# Crear ventana principal
 app = CTk()
-app.geometry("1200x600")  # Tamaño fijo para la pantalla
-app.title("SmartGrow - Monitoreo Hidropónico")
+app.geometry("1200x600")
+app.title("SmartGrow - Hydroponic System")
 
-app.iconbitmap("Sources/logo.ico")
+# Cargar ícono de la app
+base_dir = os.path.dirname(os.path.abspath(__file__))
+icon_path = os.path.join(base_dir, "Sources", "logo.png")
+if os.path.exists(icon_path):
+    app.iconphoto(True, tk.PhotoImage(file=icon_path))
 
-# Crear el Navbar
+# Navbar
 navbar = Navbar(app)
 navbar.pack(fill="x", side="top")
 
-# Frame principal donde se mostrarán las diferentes vistas
-main_frame = CTkFrame(app)
-main_frame.pack(fill="both", expand=True)
+# Frame principal con soporte de tema, texto bonito e imagen
+class MainFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        ThemeManager.subscribe(self)
+        self.pack(fill="both", expand=True)
 
-# Diccionario para almacenar las vistas creadas
-vistas = {}
+        # Texto bonito
+        self.bienvenida_label = CTkLabel(
+            self,
+            text="Hello, welcome to your hydroponic system!",
+            font=("Arial", 32, "bold"),
+            text_color=ThemeManager.get_color("text_color")
+        )
+        self.bienvenida_label.pack(pady=40)
 
-# Función para cambiar la vista
-def cambiar_vista(vista):
-    # Limpiar el frame principal
-    for widget in main_frame.winfo_children():
-        widget.pack_forget()  # Ocultar en lugar de destruir
+        # Imagen
+        image_path = os.path.join(base_dir, "Sources", "inicio.jpg")
+        if os.path.exists(image_path):
+            self.imagen = CTkImage(
+                light_image=Image.open(image_path),
+                dark_image=Image.open(image_path),
+                size=(200, 200)
+            )
+            self.imagen_label = CTkLabel(self, image=self.imagen, text="")
+            self.imagen_label.pack(pady=20)
+            
+            self.final_label = CTkLabel(
+            self,
+            text="No land, no limits. Only growth.",
+            font=("Arial", 32, "bold"),
+            text_color=ThemeManager.get_color("text_color")
+        )
+        self.final_label.pack(pady=40)
 
-    # Si la vista no ha sido creada, crearla y almacenarla en el diccionario
-    if vista not in vistas:
-        if vista == "monitoreo":
-            vistas[vista] = monitoreo(main_frame)
-        elif vista == "historial":
-            vistas[vista] = historial(main_frame)
-        elif vista == "configuracion":
-            vistas[vista] = Configuracion(main_frame)
+        self.apply_theme()
 
-    # Mostrar la vista correspondiente
-    vistas[vista].pack(fill="both", expand=True)
+    def apply_theme(self):
+        self.configure(fg_color=ThemeManager.get_color("bg_color"))
+        self.bienvenida_label.configure(text_color=ThemeManager.get_color("text_color"))
+        self.final_label.configure(text_color=ThemeManager.get_color("text_color")) 
 
-# Configurar los botones del Navbar para cambiar la vista
-navbar.home.configure(command=lambda: cambiar_vista("monitoreo"))
-navbar.about.configure(command=lambda: cambiar_vista("historial"))
-navbar.contact.configure(command=lambda: cambiar_vista("configuracion"))
+main_frame = MainFrame(app)
 
-# Mostrar la vista de monitoreo por defecto
-cambiar_vista("monitoreo")
-
+# Ejecutar app
 app.mainloop()
