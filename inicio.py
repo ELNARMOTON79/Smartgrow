@@ -1,56 +1,158 @@
-from customtkinter import *
-import tkinter as tk
-from navbar import Navbar
-from monitoreo import monitoreo
-from historial import historial
-from configuracion import Configuracion
+import customtkinter as ctk
+from PIL import Image, ImageTk
 import os
 
-app = CTk()
-app.geometry("1200x600")  # Tamaño fijo para la pantalla
-app.title("SmartGrow - Hydroponic System")
+class SmartGrowApp:
+    def __init__(self):
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
+        
+        self.app = ctk.CTk()
+        self.app.geometry("800x600")
+        self.app.title("SmartGrow")
+        self.app.configure(fg_color="#FFFFFF")
+        
+        # PRIMERO Sidebar, LUEGO MainContent
+        self.sidebar = Sidebar(self.app, None)  # Temporalmente None
+        self.main_content = MainContent(self.app)
+        self.sidebar.main_content = self.main_content  # Ahora sí, lo enlazamos correctamente
+        
+    def run(self):
+        self.app.mainloop()
 
-# Cargar el ícono de la ventana (compatible con Linux y Windows)
-base_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener el directorio actual
-icon_path = os.path.join(base_dir, "Sources", "logo.png")  # Ruta al ícono en formato PNG
-if os.path.exists(icon_path):
-    app.iconphoto(True, tk.PhotoImage(file=icon_path))  # Cargar el ícono en formato PNG
+class Sidebar:
+    def __init__(self, master, main_content):
+        self.main_content = main_content
+        self.frame = ctk.CTkFrame(master=master, width=200, corner_radius=0, fg_color="#A6E6CF")
+        self.frame.pack(side="left", fill="y")
+        self._create_widgets()
+    
+    def _create_widgets(self):
+        title_label = ctk.CTkLabel(master=self.frame, 
+                                   text="SmartGrow", 
+                                   font=ctk.CTkFont(size=18, weight="bold"),
+                                   text_color="#3CB371")
+        title_label.pack(pady=(20, 10))
+        
+        ctk.CTkLabel(master=self.frame, text="", height=30).pack(pady=(30, 10))
+        
+        ctk.CTkButton(master=self.frame, text="Home",
+                      fg_color="#4A90E2", hover_color="#3CB371", text_color="#FFFFFF",
+                      command=lambda: self.main_content.show_view("home")
+                      ).pack(pady=10, padx=20, fill="x")
+        
+        self.graphics_select = ctk.CTkOptionMenu(
+            master=self.frame,
+            values=["Ph", "Temperature", "Conductivity", "Water Level"],
+            anchor="w",
+            fg_color="#4A90E2",
+            button_color="#4A90E2",
+            button_hover_color="#3CB371",
+            text_color="#FFFFFF",
+            command=self.graphics_selected
+        )
+        self.graphics_select.set("Graphics")
+        self.graphics_select.pack(pady=10, padx=20, fill="x")
+        
+        ctk.CTkButton(master=self.frame, text="History",
+                      fg_color="#4A90E2", hover_color="#3CB371", text_color="#FFFFFF",
+                      command=lambda: self.main_content.show_view("history")
+                      ).pack(pady=10, padx=20, fill="x")
+        
+        ctk.CTkButton(master=self.frame, text="Notifications",
+                      fg_color="#4A90E2", hover_color="#3CB371", text_color="#FFFFFF",
+                      command=lambda: self.main_content.show_view("notifications")
+                      ).pack(pady=10, padx=20, fill="x")
+        
+        self.settings_select = ctk.CTkOptionMenu(
+            master=self.frame,
+            values=["Inside", "Outside"],
+            anchor="w",
+            fg_color="#4A90E2",
+            button_color="#4A90E2",
+            button_hover_color="#3CB371",
+            text_color="#FFFFFF",
+            command=self.settings_selected
+        )
+        self.settings_select.set("Settings")
+        self.settings_select.pack(pady=10, padx=20, fill="x")
 
-# Crear el Navbar
-navbar = Navbar(app)
-navbar.pack(fill="x", side="top")
+    def graphics_selected(self, selection):
+        self.main_content.show_view(selection.lower())
 
-# Frame principal donde se mostrarán las diferentes vistas
-main_frame = CTkFrame(app)
-main_frame.pack(fill="both", expand=True)
+    def settings_selected(self, selection):
+        self.main_content.show_view(selection.lower())
 
-# Diccionario para almacenar las vistas creadas
-vistas = {}
+class MainContent:
+    def __init__(self, master):
+        self.frame = ctk.CTkFrame(master=master, fg_color="#FFFFFF")
+        self.frame.pack(side="left", fill="both", expand=True)
 
-# Función para cambiar la vista
-def cambiar_vista(vista):
-    # Limpiar el frame principal
-    for widget in main_frame.winfo_children():
-        widget.pack_forget()  # Ocultar en lugar de destruir
+        self.content_container = ctk.CTkFrame(master=self.frame, fg_color="#FFFFFF")
+        self.content_container.pack(fill="both", expand=True)
 
-    # Si la vista no ha sido creada, crearla y almacenarla en el diccionario
-    if vista not in vistas:
-        if vista == "monitoreo":
-            vistas[vista] = monitoreo(main_frame)
-        elif vista == "historial":
-            vistas[vista] = historial(main_frame)
-        elif vista == "configuracion":
-            vistas[vista] = Configuracion(main_frame)
+        self.views = {}
+        self.tk_image = None
+        self.original_image = None
 
-    # Mostrar la vista correspondiente
-    vistas[vista].pack(fill="both", expand=True)
+        self._create_views()
+        self.show_view("home")
 
-# Configurar los botones del Navbar para cambiar la vista
-navbar.home.configure(command=lambda: cambiar_vista("monitoreo"))
-navbar.about.configure(command=lambda: cambiar_vista("historial"))
-navbar.contact.configure(command=lambda: cambiar_vista("configuracion"))
+    def _create_views(self):
+        # --- Vista Home ---
+        home_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+        self.image_label = ctk.CTkLabel(home_frame, text="")
+        self.image_label.pack(fill="both", expand=True)
+        home_frame.bind("<Configure>", self._resize_image)
+        self.views["home"] = home_frame
 
-# Mostrar la vista de monitoreo por defecto
-cambiar_vista("monitoreo")
+        image_path = "Sources/fondo_light.png"
+        if os.path.exists(image_path):
+            self.original_image = Image.open(image_path)
+        else:
+            self.image_label.configure(text="Imagen no encontrada", text_color="red")
 
-app.mainloop()
+        # --- Vista History ---
+        history_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+        ctk.CTkLabel(history_frame, text="Historial", font=ctk.CTkFont(size=20)).pack(pady=20)
+        self.views["history"] = history_frame
+
+        # --- Vista Notifications ---
+        notif_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+        ctk.CTkLabel(notif_frame, text="Notificaciones", font=ctk.CTkFont(size=20)).pack(pady=20)
+        self.views["notifications"] = notif_frame
+
+        # --- Vistas para gráficos ---
+        for graph in ["ph", "temperature", "conductivity", "water level"]:
+            graph_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+            ctk.CTkLabel(graph_frame, text=f"Gráfico de {graph.title()}",
+                         font=ctk.CTkFont(size=20)).pack(pady=20)
+            self.views[graph] = graph_frame
+
+        # --- Vistas para Settings ---
+        inside_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+        ctk.CTkLabel(inside_frame, text="Configuración Interna",
+                     font=ctk.CTkFont(size=20)).pack(pady=20)
+        self.views["inside"] = inside_frame
+
+        outside_frame = ctk.CTkFrame(self.content_container, fg_color="#FFFFFF")
+        ctk.CTkLabel(outside_frame, text="Configuración Externa",
+                     font=ctk.CTkFont(size=20)).pack(pady=20)
+        self.views["outside"] = outside_frame
+
+    def _resize_image(self, event):
+        if self.original_image:
+            resized = self.original_image.resize((event.width, event.height), Image.LANCZOS)
+            self.tk_image = ImageTk.PhotoImage(resized)
+            self.image_label.configure(image=self.tk_image)
+
+    def show_view(self, view_name):
+        for view in self.views.values():
+            view.pack_forget()
+        if view_name in self.views:
+            self.views[view_name].pack(fill="both", expand=True)
+
+# Ejecutar la aplicación
+if __name__ == "__main__":
+    app = SmartGrowApp()
+    app.run()
