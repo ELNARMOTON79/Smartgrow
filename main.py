@@ -263,7 +263,7 @@ class MainContent:
         self.views["home"] = home_frame
         
         # Try to load the background image
-        image_path = "./Sources/fondo_light.png"
+        image_path = "./Sources/1.png"
         if os.path.exists(image_path):
             self.original_image = Image.open(image_path)
         else:
@@ -365,11 +365,29 @@ class MainContent:
         
         self.views["custom"] = custom_frame
 
+    #def _resize_image(self, event):
+        #if self.original_image:
+            #resized = self.original_image.resize((event.width, event.height), Image.LANCZOS)
+            #self.tk_image = ImageTk.PhotoImage(resized)
+            #self.image_label.configure(image=self.tk_image)
     def _resize_image(self, event):
         if self.original_image:
-            resized = self.original_image.resize((event.width, event.height), Image.LANCZOS)
+            # Tamaño del contenedor
+            container_width = event.width
+            container_height = event.height
+
+            # Tamaño original de la imagen
+            img_width, img_height = self.original_image.size
+
+            # Calcular proporción adecuada
+            ratio = min(container_width / img_width, container_height / img_height)
+            new_size = (int(img_width * ratio), int(img_height * ratio))
+
+            resized = self.original_image.resize(new_size, Image.LANCZOS)
             self.tk_image = ImageTk.PhotoImage(resized)
+
             self.image_label.configure(image=self.tk_image)
+
 
     def show_view(self, view_name):
         # Update header title
