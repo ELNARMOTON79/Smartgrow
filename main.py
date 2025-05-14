@@ -8,7 +8,7 @@ ctk.set_default_color_theme("blue")
 
 # Simplified color palette
 COLORS = {
-    "primary": "#3B82F6",
+    "primary": "#10B981",
     "secondary": "#10B981",
     "danger": "#EF4444",
     "background": "#F9FAFB",
@@ -25,12 +25,15 @@ class Sidebar:
         self.frame.pack_propagate(False)
         
         # App logo/title
+        icon_image = Image.open("imagenes/iconoo.jpg")
+        icon_image = icon_image.resize((40, 30))  # Ajusta el tamaño del ícono
+        icon_ctk = ctk.CTkImage(light_image=icon_image, dark_image=icon_image, size=(40, 60))
         logo_frame = ctk.CTkFrame(self.frame, fg_color="transparent", height=60)
         logo_frame.pack(fill="x")
         logo_frame.pack_propagate(False)
         
         ctk.CTkLabel(
-            logo_frame, text="🌊 SmartGrow", font=ctk.CTkFont(size=20, weight="bold"),
+            logo_frame, text="Smartgrow", font=ctk.CTkFont(size=20, weight="bold"),
             text_color=COLORS["primary"]
         ).pack(side="left", padx=20)
         
@@ -160,7 +163,7 @@ class Sidebar:
         # Set active button
         active_button.configure(
             fg_color=COLORS["primary"],
-            text_color="white"
+            text_color="black"
         )
     
     def on_nav_click(self, view):
@@ -593,7 +596,8 @@ class App(ctk.CTk):
         super().__init__()
         
         # Configure window
-        self.title("AquaMonitor - Sistema de Monitoreo")
+        self.title("Smartgrow - Sistema hidroponía")
+        self.iconbitmap("Sources/logo.ico")
         self.geometry("1100x700")
         self.minsize(900, 600)
         
