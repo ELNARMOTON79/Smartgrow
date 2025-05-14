@@ -147,7 +147,6 @@ class Sidebar:
             font=ctk.CTkFont(size=14),
             command=lambda v=view: self.on_nav_click(v) if v else None
         )
-        button.pack(pady=5, padx=padding)
         button.view = view
         return button
 
@@ -413,7 +412,7 @@ class MainContent:
             temp_box,
             text="🌡️Temperatura Ideal:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         temp_entry = ctk.CTkEntry(temp_box, width=100)
@@ -427,7 +426,7 @@ class MainContent:
             ph_box,
             text="🧪 pH apropiado:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         ph_entry = ctk.CTkEntry(ph_box, width=100)
@@ -441,7 +440,7 @@ class MainContent:
             conduct_frame,
             text="⚡ Conductividad ideal (µS/cm):",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         conduct_entry = ctk.CTkEntry(conduct_frame, width=100)
@@ -450,17 +449,33 @@ class MainContent:
         # LED lights toggle
         led_frame = ctk.CTkFrame(custom_content, fg_color="transparent")
         led_frame.pack(pady=10)
-        ctk.CTkLabel(led_frame, text="Luces Led", text_color=COLORS["text_dark"], font=ctk.CTkFont(size=14)).pack(side="left")
+
+        ctk.CTkLabel(
+            led_frame,
+            text="Luces Led",
+            text_color="#10B981",  # mismo color verde que en el ejemplo
+            font=ctk.CTkFont(size=14, weight="bold")  # letra en negrita
+        ).pack(side="left")
+
         led_switch = ctk.CTkSwitch(led_frame, text="")
         led_switch.pack(side="left", padx=10)
+
 
         # Intensity slider
         intensity_frame = ctk.CTkFrame(custom_content, fg_color="transparent")
         intensity_frame.pack(pady=10)
-        ctk.CTkLabel(intensity_frame, text="Intensidad", text_color=COLORS["text_dark"], font=ctk.CTkFont(size=14)).pack(side="left")
+
+        ctk.CTkLabel(
+            intensity_frame,
+            text="Intensidad",
+            text_color="#10B981",  # color verde igual que los otros
+            font=ctk.CTkFont(size=14, weight="bold")  # texto en negrita
+        ).pack(side="left")
+
         intensity_slider = ctk.CTkSlider(intensity_frame, from_=0, to=100, width=150)
         intensity_slider.set(50)
         intensity_slider.pack(side="left", padx=10)
+
 
         # Save button
         save_button = ctk.CTkButton(custom_content, text="Guardar", width=80, fg_color=COLORS["primary"], text_color="white")
@@ -489,7 +504,7 @@ class MainContent:
             temp_box,
             text="🌡️Temperatura Ideal:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         temp_entry = ctk.CTkEntry(temp_box, width=100)
@@ -503,7 +518,7 @@ class MainContent:
             ph_box,
             text="🧪 pH apropiado:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         ph_entry = ctk.CTkEntry(ph_box, width=100)
@@ -517,7 +532,7 @@ class MainContent:
             conduct_frame,
             text="⚡ Conductividad ideal (µS/cm):",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color="#10B981"
         ).pack(side="left", padx=10)
 
         conduct_entry = ctk.CTkEntry(conduct_frame, width=100)
