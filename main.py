@@ -545,9 +545,23 @@ class MainContent:
             new_size = (int(img_width * ratio), int(img_height * ratio))
 
             resized = self.original_image.resize(new_size, Image.LANCZOS)
+            # Tamaño del contenedor
+            container_width = event.width
+            container_height = event.height
+
+            # Tamaño original de la imagen
+            img_width, img_height = self.original_image.size
+
+            # Calcular proporción adecuada
+            ratio = min(container_width / img_width, container_height / img_height)
+            new_size = (int(img_width * ratio), int(img_height * ratio))
+
+            resized = self.original_image.resize(new_size, Image.LANCZOS)
             self.tk_image = ImageTk.PhotoImage(resized)
 
+
             self.image_label.configure(image=self.tk_image)
+
 
 
     def show_view(self, view_name):
