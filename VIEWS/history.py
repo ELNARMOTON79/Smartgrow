@@ -5,65 +5,10 @@ class History:
     def __init__(self, parent):
         self.frame = ctk.CTkFrame(parent, fg_color=COLORS.card, corner_radius=15)
 
-        # Header
-        ctk.CTkLabel(
-            self.frame, text="\ud83d\udcca Historial", font=ctk.CTkFont(size=22, weight="bold"),
-            text_color=COLORS.text_dark
-        ).pack(pady=20)
-
-        # --- Filtros ---
-        filtro_frame = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
-        filtro_frame.pack(fill="x", padx=20, pady=(0, 10))
-
-        self.dia_opciones = ["Todos", "Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes"]
-        self.hora_opciones = ["Todos"] + [f"{h:02}:00" for h in range(0, 24)]
-
-        self.dia_filtro = ctk.CTkOptionMenu(filtro_frame, values=self.dia_opciones, fg_color=COLORS.card)
-        self.dia_filtro.set("Todos")
-        self.dia_filtro.pack(side="left", padx=10, pady=10)
-
-        self.hora_inicio = ctk.CTkOptionMenu(filtro_frame, values=self.hora_opciones, fg_color=COLORS.card)
-        self.hora_inicio.set("Todos")
-        self.hora_inicio.pack(side="left", padx=10)
-
-        self.hora_fin = ctk.CTkOptionMenu(filtro_frame, values=self.hora_opciones, fg_color=COLORS.card)
-        self.hora_fin.set("Todos")
-        self.hora_fin.pack(side="left", padx=10)
-
-        ctk.CTkButton(
-            filtro_frame, text="Filtrar", fg_color=COLORS.primary, text_color="white",
-            command=self.aplicar_filtro
-        ).pack(side="left", padx=10)
-
-        # Contenedor tabla
-        self.table_container = ctk.CTkScrollableFrame(
-            self.frame, height=450, fg_color=COLORS.background, corner_radius=10
-        )
-        self.table_container.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-
-        # Paginación
-        self.filas_por_pagina = 5
-        self.pagina_actual = 0
-
-        pag_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
-        pag_frame.pack(pady=(0, 10))
-
-        self.btn_anterior = ctk.CTkButton(
-            pag_frame, text="\u2b05 Anterior", fg_color=COLORS.secondary, text_color="white",
-            command=self.ir_anterior
-        )
-        self.btn_anterior.pack(side="left", padx=10)
-
-        self.pagina_label = ctk.CTkLabel(
-            pag_frame, text="Página 1", text_color=COLORS.text_dark
-        )
-        self.pagina_label.pack(side="left", padx=10)
-
-        self.btn_siguiente = ctk.CTkButton(
-            pag_frame, text="Siguiente \u27a1", fg_color=COLORS.primary, text_color="white",
-            command=self.ir_siguiente
-        )
-        self.btn_siguiente.pack(side="left", padx=10)
+        self._crear_header()
+        self._crear_filtros()
+        self._crear_tabla()
+        self._crear_paginacion()
 
         # Datos de ejemplo
         self.datos = [
@@ -79,6 +24,67 @@ class History:
 
         self.aplicar_filtro()
 
+    def _crear_header(self):
+        ctk.CTkLabel(
+            self.frame, text="📊 Historsy", font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=COLORS.text_dark
+        ).pack(pady=20)
+
+    def _crear_filtros(self):
+        filtro_frame = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
+        filtro_frame.pack(fill="x", padx=20, pady=(0, 15))
+
+        self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        self.hora_opciones = ["All"] + [f"{h:02}:00" for h in range(0, 24)]
+
+        def crear_filtro(label_text, opciones, variable_set):
+            sub_frame = ctk.CTkFrame(filtro_frame, fg_color="transparent")
+            sub_frame.pack(side="left", padx=5, pady=10)
+            ctk.CTkLabel(sub_frame, text=label_text, text_color=COLORS.text_dark).pack()
+            menu = ctk.CTkOptionMenu(sub_frame, values=opciones, fg_color=COLORS.card)
+            menu.set("All")
+            menu.pack()
+            return menu
+
+        self.dia_filtro = crear_filtro("Day", self.dia_opciones, "dia")
+        self.hora_inicio = crear_filtro("From", self.hora_opciones, "inicio")
+        self.hora_fin = crear_filtro("To", self.hora_opciones, "fin")
+
+        ctk.CTkButton(
+            filtro_frame, text="🔍 Filter", fg_color=COLORS.primary, text_color="white",
+            command=self.aplicar_filtro
+        ).pack(side="left", padx=20)
+
+    def _crear_tabla(self):
+        self.table_container = ctk.CTkScrollableFrame(
+            self.frame, height=450, fg_color=COLORS.background, corner_radius=10
+        )
+        self.table_container.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+
+    def _crear_paginacion(self):
+        self.filas_por_pagina = 5
+        self.pagina_actual = 0
+
+        pag_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
+        pag_frame.pack(pady=(0, 20))
+
+        self.btn_anterior = ctk.CTkButton(
+            pag_frame, text="⬅ Anterior", fg_color=COLORS.secondary, text_color="white",
+            command=self.ir_anterior
+        )
+        self.btn_anterior.pack(side="left", padx=10)
+
+        self.pagina_label = ctk.CTkLabel(
+            pag_frame, text="Página 1", text_color=COLORS.text_dark
+        )
+        self.pagina_label.pack(side="left", padx=10)
+
+        self.btn_siguiente = ctk.CTkButton(
+            pag_frame, text="Siguiente ➡", fg_color=COLORS.primary, text_color="white",
+            command=self.ir_siguiente
+        )
+        self.btn_siguiente.pack(side="left", padx=10)
+
     def aplicar_filtro(self):
         dia = self.dia_filtro.get()
         hora_inicio = self.hora_inicio.get()
@@ -87,12 +93,11 @@ class History:
         self.datos_filtrados = []
 
         for row in self.datos:
-            dia_match = (dia == "Todos" or row[0] == dia)
+            dia_match = (dia == "All" or row[0] == dia)
             hora_match = True
-
-            if hora_inicio != "Todos" and row[1] < hora_inicio:
+            if hora_inicio != "All" and row[1] < hora_inicio:
                 hora_match = False
-            if hora_fin != "Todos" and row[1] > hora_fin:
+            if hora_fin != "All" and row[1] > hora_fin:
                 hora_match = False
 
             if dia_match and hora_match:
@@ -105,7 +110,7 @@ class History:
         for widget in self.table_container.winfo_children():
             widget.destroy()
 
-        headers = ["\ud83d\udcc5 Día", "\u23f0 Hora", "\ud83c\udf21 Temp. (\u00b0C)", "\ud83e\uddea pH", "\u26a1 Conduct. (\u00b5S/cm)"]
+        headers = ["📅 Day", "⏰ Hoour", "🌡️ Temp. (°C)", "🧪 pH", "⚡ Conduct. (µS/cm)"]
         header_frame = ctk.CTkFrame(self.table_container, fg_color=COLORS.primary)
         header_frame.pack(fill="x", pady=(0, 8), padx=4)
 
@@ -113,7 +118,7 @@ class History:
             header_frame.columnconfigure(i, weight=1)
             ctk.CTkLabel(
                 header_frame, text=header, font=ctk.CTkFont(size=14, weight="bold"),
-                height=35, text_color="white", fg_color=COLORS.primary, corner_radius=6
+                height=35, text_color="white"
             ).grid(row=0, column=i, padx=2, sticky="nsew")
 
         inicio = self.pagina_actual * self.filas_por_pagina
@@ -123,7 +128,7 @@ class History:
         for idx, row_data in enumerate(pagina_datos):
             row_frame = ctk.CTkFrame(
                 self.table_container,
-                fg_color=COLORS.card if idx % 2 == 0 else "#F3F4F6"
+                fg_color=COLORS.card if idx % 2 == 0 else "#ECEFF1"
             )
             row_frame.pack(fill="x", pady=2, padx=4)
 
