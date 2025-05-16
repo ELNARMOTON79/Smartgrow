@@ -1,83 +1,106 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
 import serial
 import threading
-import tkinter as tk
-from tkinter import ttk
+import time
 
-SERIAL_PORT = 'COM8'  # Cambia esto a tu puerto
-BAUD_RATE = 9600
+# Configura aquí el puerto y baudrate que usa tu Arduino
+PUERTO_SERIAL = 'COM11'  # Cambia esto según tu sistema (ej. '/dev/ttyUSB0' en Linux)
+BAUDRATE = 9600
 
-root = tk.Tk() 
-root.title("Sistema Hidropónico")
-root.geometry("500x500")
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Monitor EC y Temperatura")
 
-temperature_var = tk.StringVar(value="--")
-distance_var = tk.StringVar(value="--")
-ec_var = tk.StringVar(value="--")
-ph_var = tk.StringVar(value="--")
-intensity_var = tk.StringVar(value="--")
-water_status = tk.StringVar(value="OFF")
-peri_status = tk.StringVar(value="OFF")
+        # Variables de sensores
+        self.volt_var = tk.StringVar(value="---")
+        self.ec_var = tk.StringVar(value="---")
+        self.temp_var = tk.StringVar(value="---")
 
-# Datos en pantalla
-labels = [
-    ("Temperatura (°C)", temperature_var),
-    ("Distancia (cm)", distance_var),
-    ("Conductividad (EC)", ec_var),
-    ("pH", ph_var),
-    ("Intensidad de Luz", intensity_var),
-    ("Bomba Agua", water_status),
-    ("Bomba Peristáltica", peri_status)
-]
+        # Serial
+        self.serial_connected = False
+        try:
+            self.ser = serial.Serial(PUERTO_SERIAL, BAUDRATE, timeout=1)
+            self.serial_connected = True
+        except Exception as e:
+            messagebox.showerror("Error de conexión", f"No se pudo conectar al puerto {PUERTO_SERIAL}\n{e}")
+            return
 
-for text, var in labels:
-    ttk.Label(root, text=text + ":").pack(pady=(5, 0))
-    ttk.Label(root, textvariable=var, font=("Arial", 12)).pack()
+        # UI
+        self.create_widgets()
 
-ser = None
+        # Hilo para leer datos
+        self.running = True
+        threading.Thread(target=self.read_serial, daemon=True).start()
 
-def send_command(command):
-    if ser and ser.is_open:
-        ser.write((command + '\n').encode())
+    def create_widgets(self):
+        ttk.Label(self.root, text="Voltaje (V):").grid(row=0, column=0, sticky="e")
+        ttk.Label(self.root, textvariable=self.volt_var).grid(row=0, column=1)
 
-# Controles de luz
-ttk.Label(root, text="Controles de Luz").pack(pady=10)
-btn_frame = ttk.Frame(root)
-btn_frame.pack()
+        ttk.Label(self.root, text="Conductividad (mS/cm):").grid(row=1, column=0, sticky="e")
+        ttk.Label(self.root, textvariable=self.ec_var).grid(row=1, column=1)
 
-ttk.Button(btn_frame, text="Encender/Apagar Luz", command=lambda: send_command("BTN1")).grid(row=0, column=0, padx=5, pady=5)
-ttk.Button(btn_frame, text="Cambiar Espectro", command=lambda: send_command("BTN2")).grid(row=0, column=1, padx=5, pady=5)
-ttk.Button(btn_frame, text="Cambiar Intensidad", command=lambda: send_command("BTN3")).grid(row=1, column=0, columnspan=2, pady=5)
+        ttk.Label(self.root, text="Temperatura (°C):").grid(row=2, column=0, sticky="e")
+        ttk.Label(self.root, textvariable=self.temp_var).grid(row=2, column=1)
 
-# Controles de bombas
-ttk.Label(root, text="Controles de Bombas").pack(pady=10)
-pump_frame = ttk.Frame(root)
-pump_frame.pack()
+        ttk.Label(self.root, text="").grid(row=3, column=0)
 
-ttk.Button(pump_frame, text="Bomba de Agua", command=lambda: send_command("WATER")).grid(row=0, column=0, padx=10, pady=5)
-ttk.Button(pump_frame, text="Bomba Peristáltica", command=lambda: send_command("PERISTALTIC")).grid(row=0, column=1, padx=10, pady=5)
+        btn_frame = ttk.Frame(self.root)
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=10)
 
-# Lectura del serial en segundo plano
-def read_serial():
-    global ser
-    try:
-        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-        while True:
-            line = ser.readline().decode('utf-8').strip()
-            if line:
-                try:
-                    data = dict(item.split(":") for item in line.split(","))
-                    temperature_var.set(data.get("TEMP", "--"))
-                    distance_var.set(data.get("DIST", "--"))
-                    ec_var.set(data.get("EC", "--"))
-                    ph_var.set(data.get("PH", "--"))
-                    intensity_var.set(data.get("INTENSITY", "--"))
-                    water_status.set(data.get("WATER", "--"))
-                    peri_status.set(data.get("PERI", "--"))
-                except Exception as e:
-                    print("Error procesando datos:", e)
-    except serial.SerialException as e:
-        print("Error abriendo puerto:", e)
+        ttk.Button(btn_frame, text="Encender/Apagar (A)", command=lambda: self.send_command('A')).grid(row=0, column=0, padx=5)
+        ttk.Button(btn_frame, text="Cambiar Espectro (B)", command=lambda: self.send_command('B')).grid(row=0, column=1, padx=5)
+        ttk.Button(btn_frame, text="Cambiar Intensidad (C)", command=lambda: self.send_command('C')).grid(row=0, column=2, padx=5)
 
-threading.Thread(target=read_serial, daemon=True).start()
+    def send_command(self, command):
+        if self.serial_connected:
+            try:
+                self.ser.write(command.encode())
+            except:
+                messagebox.showerror("Error", "Fallo al enviar comando.")
 
-root.mainloop()
+    def read_serial(self):
+        buffer = ""
+        while self.running and self.serial_connected:
+            try:
+                if self.ser.in_waiting:
+                    char = self.ser.read().decode(errors='ignore')
+                    if char == '\n':
+                        self.parse_line(buffer.strip())
+                        buffer = ""
+                    else:
+                        buffer += char
+            except:
+                continue
+            time.sleep(0.1)
+
+    def parse_line(self, line):
+        # Ejemplo de línea: "Voltaje: 2.56 V Conductividad: 1.23 mS/cm"
+        if "Voltaje" in line and "Conductividad" in line:
+            try:
+                parts = line.split()
+                volt = parts[1]
+                ec = parts[4]
+                self.volt_var.set(volt)
+                self.ec_var.set(ec)
+            except:
+                pass
+        elif "Temperatura=" in line:
+            try:
+                temp = line.split('=')[1].split()[0]
+                self.temp_var.set(temp)
+            except:
+                pass
+
+    def close(self):
+        self.running = False
+        if self.serial_connected:
+            self.ser.close()
+        self.root.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = App(root)
+    root.protocol("WM_DELETE_WINDOW", app.close)
+    root.mainloop()
