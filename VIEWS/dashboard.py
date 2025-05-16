@@ -34,7 +34,7 @@ class Dashboard:
         # Try to load the background image
         self.tk_image = None
         self.original_image = None
-        image_path = "./Sources/fondo_light.png"
+        image_path = "./Sources/1.png"
         if os.path.exists(image_path):
             self.original_image = Image.open(image_path)
         else:
