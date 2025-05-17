@@ -16,9 +16,9 @@ class Dashboard:
         
         self.stats_labels = {}
         stats_data = [
-            {"title": "Temperatura", "value": "Esperando...", "icon": "🌡️", "color": COLORS.primary},
+            {"title": "Temperature", "value": "Waiting...", "icon": "🌡️", "color": COLORS.primary},
             {"title": "pH", "value": "6.2", "icon": "🧪", "color": COLORS.secondary},  # Valor estático por ahora
-            {"title": "Conductividad", "value": "Esperando...", "icon": "⚡", "color": "#F59E0B"},
+            {"title": "Conductivity", "value": "Waiting...", "icon": "⚡", "color": "#F59E0B"},
             {"title": "Water Level", "value": "100%", "icon": "🚰", "color": "#F59E0B"}  # Valor estático por ahora
         ]
         
