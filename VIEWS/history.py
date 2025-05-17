@@ -48,7 +48,7 @@ class History:
 
         self.dia_filtro = crear_filtro("Day", self.dia_opciones, "dia")
         self.hora_inicio = crear_filtro("From", self.hora_opciones, "inicio")
-        self.hora_fin = crear_filtro("To", self.hora_opciones, "fin")
+        self.hora_fin = crear_filtro("To", self.hora_opciones, " fin")
 
         ctk.CTkButton(
             filtro_frame, text="🔍 Filter", fg_color=COLORS.primary, text_color="white",
