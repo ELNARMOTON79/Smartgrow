@@ -16,13 +16,13 @@ class CustomView:
         content.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
         # Inputs
-        self.ph_entry = self._create_labeled_entry(content, "pH ideal:")
-        self.temp_entry = self._create_labeled_entry(content, "Temperatura ideal (°C):")
-        self.ec_entry = self._create_labeled_entry(content, "Electroconductividad ideal (μS/cm):")
+        self.ph_entry = self._create_labeled_entry(content, "Ideal pH:")
+        self.temp_entry = self._create_labeled_entry(content, "Ideal Temperature (°C):")
+        self.ec_entry = self._create_labeled_entry(content, "Ideal Electroconductivity (μS/cm):")
 
         # Botón de guardar
         save_btn = ctk.CTkButton(
-            content, text="Guardar", fg_color=COLORS.primary, hover_color=COLORS.secondary,
+            content, text="Save", fg_color=COLORS.primary, hover_color=COLORS.secondary,
             text_color="white", command=self.save_settings
         )
         save_btn.pack(pady=10)
@@ -32,17 +32,17 @@ class CustomView:
         btn_frame.pack(pady=10)
 
         ctk.CTkButton(
-            btn_frame, text="Encender Lámpara", fg_color=COLORS.secondary,
+            btn_frame, text="Turn on Lamp", fg_color=COLORS.secondary,
             text_color="white", command=self.toggle_light
         ).pack(side="left", padx=5)
 
         ctk.CTkButton(
-            btn_frame, text="Cambiar Espectro", fg_color=COLORS.primary,
+            btn_frame, text="Change Spectrum", fg_color=COLORS.primary,
             text_color="white", command=self.change_spectrum
         ).pack(side="left", padx=5)
 
         ctk.CTkButton(
-            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.danger,
+            btn_frame, text="Adjust Intensity", fg_color=COLORS.danger,
             text_color="white", command=self.adjust_intensity
         ).pack(side="left", padx=5)
 
