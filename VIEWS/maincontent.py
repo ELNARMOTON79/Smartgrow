@@ -49,9 +49,9 @@ class MainContent:
         # Update header title
         titles = {
             "home": "Dashboard",
-            "history": "Historial",
-            "notifications": "Notificaciones",
-            "custom": "Settings"
+            "history": "",
+            "notifications": "",
+            "custom": ""
         }
         self.title_label.configure(text=titles.get(view_name, "Dashboard"))
         

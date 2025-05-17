@@ -26,7 +26,7 @@ class History:
 
     def _crear_header(self):
         ctk.CTkLabel(
-            self.frame, text="📊 Historsy", font=ctk.CTkFont(size=22, weight="bold"),
+            self.frame, text="📊 History", font=ctk.CTkFont(size=22, weight="bold"),
             text_color=COLORS.text_dark
         ).pack(pady=20)
 
