@@ -76,3 +76,6 @@ class Notifications:
     
     def marcar_leido(self, card):
         card.configure(fg_color="#F0FDF4")  # Light green background
+
+    
+

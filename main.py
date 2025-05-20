@@ -25,6 +25,7 @@ class App(ctk.CTk):
         self.sidebar = Sidebar(self)
         
         # Create main content
+
         self.main_content = MainContent(self)
         
         # Connect sidebar to main content
