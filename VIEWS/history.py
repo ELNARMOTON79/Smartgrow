@@ -39,7 +39,7 @@ class History:
         filtro_frame.pack(fill="x", padx=20, pady=(0, 15))
 
         self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        self.hora_opciones = ["All"] + [f"{h:02}:00" for h in range(0, 24)]  # todas las horas
+        self.hora_opciones = ["All"] + [f"{(h % 12) or 12}:00 {'AM' if h < 12 else 'PM'}" for h in range(0, 24)]
 
         filtros_y_boton = ctk.CTkFrame(filtro_frame, fg_color="transparent")
         filtros_y_boton.pack(padx=10, pady=10, fill="x")
