@@ -1,5 +1,8 @@
 import customtkinter as ctk
 from VIEWS.colors import COLORS
+import serial
+import threading
+import time
 
 class Notifications:
     def __init__(self, parent):
@@ -76,3 +79,57 @@ class Notifications:
     
     def marcar_leido(self, card):
         card.configure(fg_color="#F0FDF4")  # Light green background
+
+    def read_serial_data(self):
+        try:
+            ser = serial.Serial('COM11', 9600, timeout=1)
+            time.sleep(2)  # Esperar reinicio del Arduino
+
+            buffer = ""
+            while True:
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
+
+                if line:
+                    print(f"📥 Recibido: {line}")  # 👈 Imprime cada línea recibida
+
+                    buffer += line + "\n"
+
+                    if "-----" in line:
+                        print("🧩 Bloque detectado, analizando...")
+                        self.parse_serial_block(buffer)
+                        buffer = ""
+
+                time.sleep(0.2)
+
+        except Exception as e:
+            print("❌ Error al abrir el puerto serial:", e)
+
+
+    def parse_serial_block(self, data_block):
+        try:
+            lines = data_block.strip().splitlines()
+            values = {}
+
+            for line in lines:
+                if "Temperatura" in line:
+                    temp = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Temperature"] = f"{temp} °C"
+
+                elif "Conductividad" in line or "EC:" in line:
+                    ec = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Conductivity"] = f"{ec} mS/cm"
+
+                elif "Nivel_agua" in line or "Nivel de agua" in line:
+                    nivel = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Water Level"] = f"{nivel} cm"
+
+                elif "pH" in line:
+                    ph = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["pH"] = f"{ph}"
+
+            for key, val in values.items():
+                if key in self.stats_labels:
+                    self.stats_labels[key].after(0, lambda lbl=self.stats_labels[key], v=val: lbl.configure(text=v))
+
+        except Exception as e:
+            print("❌ Error al analizar datos:", e)
