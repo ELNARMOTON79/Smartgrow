@@ -4,7 +4,7 @@ import os
 import serial
 import threading
 import time
-from VIEWS.colors import COLORS  # Asegúrate de que COLORS esté correctamente definido
+from VIEWS.colors import COLORS  # Asegúrate de que este archivo existe y tiene los colores correctos
 
 class Dashboard:
     def __init__(self, parent):
@@ -16,10 +16,10 @@ class Dashboard:
         
         self.stats_labels = {}
         stats_data = [
-            {"title": "Temperatura", "value": "Esperando...", "icon": "🌡️", "color": COLORS.primary},
-            {"title": "pH", "value": "6.2", "icon": "🧪", "color": COLORS.secondary},  # Valor estático por ahora
-            {"title": "Conductividad", "value": "Esperando...", "icon": "⚡", "color": "#F59E0B"},
-            {"title": "Water Level", "value": "100%", "icon": "🚰", "color": "#F59E0B"}  # Valor estático por ahora
+            {"title": "Temperature", "value": "Waiting...", "icon": "🌡️", "color": COLORS.primary},
+            {"title": "pH", "value": "Waiting...", "icon": "🧪", "color": COLORS.secondary},
+            {"title": "Conductivity", "value": "Waiting...", "icon": "⚡", "color": "#F59E0B"},
+            {"title": "Water Level", "value": "Waiting...", "icon": "🚰", "color": "#3B82F6"}
         ]
         
         for stat in stats_data:
@@ -78,30 +78,54 @@ class Dashboard:
 
     def read_serial_data(self):
         try:
-            # Cambia esto al puerto correcto en tu sistema
-            ser = serial.Serial('COM3', 9600, timeout=1)
-            time.sleep(2)  # Espera a que el Arduino reinicie
+            ser = serial.Serial('COM11', 9600, timeout=1)
+            time.sleep(2)  # Esperar reinicio del Arduino
 
+            buffer = ""
             while True:
-                line1 = ser.readline().decode('utf-8').strip()
-                line2 = ser.readline().decode('utf-8').strip()
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
 
-                if line1.startswith("Voltaje") and line2.startswith("Temperatura"):
-                    try:
-                        ec_part = line1.split("Conductividad:")[1].strip().split(" ")[0]
-                        ec_value = f"{ec_part} mS/cm"
+                if line:
+                    print(f"📥 Recibido: {line}")  # 👈 Imprime cada línea recibida
 
-                        temp_part = line2.split("=")[1].strip().split(" ")[0]
-                        temp_value = f"{temp_part} °C"
+                    buffer += line + "\n"
 
-                        # Actualizar las etiquetas en el hilo principal
-                        self.stats_labels["Temperatura"].after(0, self.stats_labels["Temperatura"].configure, {"text": temp_value})
-                        self.stats_labels["Conductividad"].after(0, self.stats_labels["Conductividad"].configure, {"text": ec_value})
+                    if "-----" in line:
+                        print("🧩 Bloque detectado, analizando...")
+                        self.parse_serial_block(buffer)
+                        buffer = ""
 
-                    except Exception as parse_error:
-                        print("Error al analizar los datos:", parse_error)
-                
-                time.sleep(1)
+                time.sleep(0.2)
 
         except Exception as e:
-            print("Error abriendo el puerto serial:", e)
+            print("❌ Error al abrir el puerto serial:", e)
+
+
+    def parse_serial_block(self, data_block):
+        try:
+            lines = data_block.strip().splitlines()
+            values = {}
+
+            for line in lines:
+                if "Temperatura" in line:
+                    temp = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Temperature"] = f"{temp} °C"
+
+                elif "Conductividad" in line or "EC:" in line:
+                    ec = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Conductivity"] = f"{ec} mS/cm"
+
+                elif "Nivel_agua" in line or "Nivel de agua" in line:
+                    nivel = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["Water Level"] = f"{nivel} cm"
+
+                elif "pH" in line:
+                    ph = ''.join(c for c in line if c.isdigit() or c == '.' or c == ',')
+                    values["pH"] = f"{ph}"
+
+            for key, val in values.items():
+                if key in self.stats_labels:
+                    self.stats_labels[key].after(0, lambda lbl=self.stats_labels[key], v=val: lbl.configure(text=v))
+
+        except Exception as e:
+            print("❌ Error al analizar datos:", e)

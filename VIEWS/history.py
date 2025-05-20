@@ -1,9 +1,11 @@
 import customtkinter as ctk
 from VIEWS.colors import COLORS
+import tkinter.ttk as ttk 
 
 class History:
     def __init__(self, parent):
         self.frame = ctk.CTkFrame(parent, fg_color=COLORS.card, corner_radius=15)
+
 
         self._crear_header()
         self._crear_filtros()
@@ -12,14 +14,14 @@ class History:
 
         # Datos de ejemplo
         self.datos = [
-            ["Lunes", "08:00", "22.5", "6.2", "1300"],
-            ["Lunes", "12:00", "24.1", "6.3", "1400"],
-            ["Martes", "08:00", "21.8", "6.1", "1250"],
-            ["Martes", "12:00", "23.0", "6.4", "1350"],
-            ["Miércoles", "09:00", "22.0", "6.2", "1320"],
-            ["Jueves", "10:00", "22.8", "6.5", "1330"],
-            ["Viernes", "11:00", "23.2", "6.3", "1380"],
-            ["Viernes", "13:00", "23.6", "6.2", "1420"],
+            ["Monday", "08:00", "22.5", "6.2", "1300"],
+            ["Monday", "12:00", "24.1", "6.3", "1400"],
+            ["Tuesday", "08:00", "21.8", "6.1", "1250"],
+            ["Tuesday", "12:00", "23.0", "6.4", "1350"],
+            ["Wednesday", "09:00", "22.0", "6.2", "1320"],
+            ["Thursday", "10:00", "22.8", "6.5", "1330"],
+            ["Friday", "11:00", "23.2", "6.3", "1380"],
+            ["Friday", "13:00", "23.6", "6.2", "1420"],
         ]
 
         self.aplicar_filtro()
@@ -30,57 +32,71 @@ class History:
             text_color=COLORS.text_dark
         ).pack(pady=20)
 
+    import tkinter.ttk as ttk  # Asegúrate de tener esta línea al inicio del archivo
+
     def _crear_filtros(self):
         filtro_frame = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
         filtro_frame.pack(fill="x", padx=20, pady=(0, 15))
 
         self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        self.hora_opciones = ["All"] + [f"{h:02}:00" for h in range(0, 24)]
+        self.hora_opciones = ["All"] + [f"{h:02}:00" for h in range(0, 24)]  # todas las horas
 
-        def crear_filtro(label_text, opciones, variable_set):
-            sub_frame = ctk.CTkFrame(filtro_frame, fg_color="transparent")
-            sub_frame.pack(side="left", padx=5, pady=10)
+        filtros_y_boton = ctk.CTkFrame(filtro_frame, fg_color="transparent")
+        filtros_y_boton.pack(padx=10, pady=10, fill="x")
+
+        filtros_y_boton.grid_columnconfigure((0, 1, 2, 3), weight=1, uniform="filtros")
+
+        def crear_filtro(label_text, opciones, col):
+            sub_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
+            sub_frame.grid(row=0, column=col, padx=5, pady=5, sticky="nsew")
             ctk.CTkLabel(sub_frame, text=label_text, text_color=COLORS.text_dark).pack()
-            menu = ctk.CTkOptionMenu(sub_frame, values=opciones, fg_color=COLORS.card)
-            menu.set("All")
-            menu.pack()
-            return menu
 
-        self.dia_filtro = crear_filtro("Day", self.dia_opciones, "dia")
-        self.hora_inicio = crear_filtro("From", self.hora_opciones, "inicio")
-        self.hora_fin = crear_filtro("To", self.hora_opciones, " fin")
+            # Combobox de ttk con scroll automático
+            combo = ttk.Combobox(sub_frame, values=opciones, state="readonly", width=18)
+            combo.set("All")
+            combo.pack(ipady=6, fill="x",padx=4)  # padding interno para apariencia decente
+            return combo
 
+        self.dia_filtro = crear_filtro("Day", self.dia_opciones, 0)
+        self.hora_inicio = crear_filtro("From", self.hora_opciones, 1)
+        self.hora_fin = crear_filtro("To", self.hora_opciones, 2)
+
+        # Botón de filtro
+        boton_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
+        boton_frame.grid(row=0, column=3, padx=10, pady=(18, 0), sticky="nsew")
         ctk.CTkButton(
-            filtro_frame, text="🔍 Filter", fg_color=COLORS.primary, text_color="white",
+            boton_frame, text="🔍 Filter", fg_color=COLORS.primary, text_color="white",
             command=self.aplicar_filtro
-        ).pack(side="left", padx=20)
+        ).pack()
+
+
 
     def _crear_tabla(self):
-        self.table_container = ctk.CTkScrollableFrame(
-            self.frame, height=450, fg_color=COLORS.background, corner_radius=10
+        self.table_container = ctk.CTkFrame(
+            self.frame, fg_color=COLORS.background, corner_radius=10
         )
         self.table_container.pack(fill="both", expand=True, padx=20, pady=(0, 10))
 
     def _crear_paginacion(self):
-        self.filas_por_pagina = 5
+        self.filas_por_pagina = 6
         self.pagina_actual = 0
 
         pag_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
         pag_frame.pack(pady=(0, 20))
 
         self.btn_anterior = ctk.CTkButton(
-            pag_frame, text="⬅ Anterior", fg_color=COLORS.secondary, text_color="white",
+            pag_frame, text="⬅ Previous", fg_color=COLORS.secondary, text_color="white",
             command=self.ir_anterior
         )
         self.btn_anterior.pack(side="left", padx=10)
 
         self.pagina_label = ctk.CTkLabel(
-            pag_frame, text="Página 1", text_color=COLORS.text_dark
+            pag_frame, text="Page 1", text_color=COLORS.text_dark
         )
         self.pagina_label.pack(side="left", padx=10)
 
         self.btn_siguiente = ctk.CTkButton(
-            pag_frame, text="Siguiente ➡", fg_color=COLORS.primary, text_color="white",
+            pag_frame, text="Next ➡", fg_color=COLORS.primary, text_color="white",
             command=self.ir_siguiente
         )
         self.btn_siguiente.pack(side="left", padx=10)
@@ -110,7 +126,7 @@ class History:
         for widget in self.table_container.winfo_children():
             widget.destroy()
 
-        headers = ["📅 Day", "⏰ Hoour", "🌡️ Temp. (°C)", "🧪 pH", "⚡ Conduct. (µS/cm)"]
+        headers = ["📅 Day", "⏰ Hour", "🌡️ Temp. (°C)", "🧪 pH", "⚡ Conduct. (µS/cm)"]
         header_frame = ctk.CTkFrame(self.table_container, fg_color=COLORS.primary)
         header_frame.pack(fill="x", pady=(0, 8), padx=4)
 
@@ -140,7 +156,7 @@ class History:
                 ).grid(row=0, column=i, padx=2, sticky="nsew")
 
         total_paginas = max(1, (len(self.datos_filtrados) + self.filas_por_pagina - 1) // self.filas_por_pagina)
-        self.pagina_label.configure(text=f"Página {self.pagina_actual + 1} de {total_paginas}")
+        self.pagina_label.configure(text=f"Page {self.pagina_actual + 1} de {total_paginas}")
         self.btn_anterior.configure(state="normal" if self.pagina_actual > 0 else "disabled")
         self.btn_siguiente.configure(state="normal" if self.pagina_actual < total_paginas - 1 else "disabled")
 
