@@ -1,17 +1,18 @@
 import customtkinter as ctk
 from VIEWS.colors import COLORS
+from CTkMessagebox import CTkMessagebox  # ✅ Importar el mensaje emergente
 
 class CustomView:
     def __init__(self, parent):
         self.frame = ctk.CTkFrame(parent, fg_color=COLORS.card, corner_radius=15)
-        
+        self.settings = {}
+
         # Header
         ctk.CTkLabel(
             self.frame, text="Settings", font=ctk.CTkFont(size=22, weight="bold"),
             text_color=COLORS.text_dark
         ).pack(pady=20)
-        
-        # Content container
+
         content = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
         content.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
@@ -27,7 +28,11 @@ class CustomView:
         )
         save_btn.pack(pady=10)
 
-        # Botones para control de la lámpara
+        # Etiqueta para mostrar confirmación
+        self.status_label = ctk.CTkLabel(content, text="", text_color=COLORS.text_dark)
+        self.status_label.pack()
+
+        # Botones de control
         btn_frame = ctk.CTkFrame(content, fg_color=COLORS.background)
         btn_frame.pack(pady=10)
 
@@ -56,11 +61,22 @@ class CustomView:
         return entry
 
     def save_settings(self):
-        ph = self.ph_entry.get()
-        temp = self.temp_entry.get()
-        ec = self.ec_entry.get()
-        print(f"Guardado: pH={ph}, Temp={temp}, EC={ec}")
-        # Aquí puedes conectar lógica de base de datos o enviar a hardware
+        # Mostrar confirmación al usuario
+        msg = CTkMessagebox(title="Confirmación", message="¿Estás seguro de guardar los valores?",
+                            icon="question", option_1="Sí", option_2="No")
+
+        if msg.get() == "Sí":
+            self.settings = {
+                "pH": self.ph_entry.get(),
+                "Temperatura": self.temp_entry.get(),
+                "EC": self.ec_entry.get()
+            }
+            print("Guardado:", self.settings)
+            self.status_label.configure(text="Configuración guardada correctamente ✅")
+            self.status_label.after(3000, lambda: self.status_label.configure(text=""))
+        else:
+            self.status_label.configure(text="Guardado cancelado ❌")
+            self.status_label.after(3000, lambda: self.status_label.configure(text=""))
 
     def toggle_light(self):
         print("Lámpara encendida/apagada")

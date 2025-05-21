@@ -5,7 +5,6 @@ import serial
 import threading
 import time
 from VIEWS.colors import COLORS  # Asegúrate de que este archivo existe y tiene los colores correctos
-from base_datos.contacto import guardar_registro  # Asegúrate de que este archivo existe y tiene la clase Contacto
 
 class Dashboard:
     def __init__(self, parent):
