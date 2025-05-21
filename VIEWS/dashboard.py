@@ -136,4 +136,3 @@ class Dashboard:
         conductividad = values.get("Conductivity", "").replace(" mS/cm", "")
         nivel_agua = values.get("Water Level", "").replace(" cm", "")
 
-        guardar_registro(temperatura, ph, conductividad, nivel_agua)
