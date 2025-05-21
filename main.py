@@ -6,6 +6,7 @@ from VIEWS.maincontent import MainContent
 from VIEWS.colors import COLORS
 
 
+
 # Set appearance mode and default color theme
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
