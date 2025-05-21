@@ -99,6 +99,7 @@ class Notifications:
                 line = ser.readline().decode('utf-8', errors='ignore').strip()
 
                 if line:
+                    
                     print(f"📥 Recibido: {line}")  # 👈 Imprime cada línea recibida
 
                     buffer += line + "\n"
@@ -155,6 +156,10 @@ class Notifications:
     notification.icon = path.join(direcion, icono)
 
     notification.send()
+
+    
+
+
 
 
 
