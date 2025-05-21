@@ -5,6 +5,7 @@ import serial
 import threading
 import time
 from VIEWS.colors import COLORS  # Asegúrate de que este archivo existe y tiene los colores correctos
+from base_datos.contacto import guardar_registro  # Asegúrate de que este archivo existe y tiene la clase Contacto
 
 class Dashboard:
     def __init__(self, parent):
@@ -129,3 +130,11 @@ class Dashboard:
 
         except Exception as e:
             print("❌ Error al analizar datos:", e)
+
+        # Dentro de parse_serial_block al final:
+        temperatura = values.get("Temperature", "").replace(" °C", "")
+        ph = values.get("pH", "")
+        conductividad = values.get("Conductivity", "").replace(" mS/cm", "")
+        nivel_agua = values.get("Water Level", "").replace(" cm", "")
+
+        guardar_registro(temperatura, ph, conductividad, nivel_agua)
