@@ -113,7 +113,6 @@ class Notifications:
         except Exception as e:
             print("❌ Error al abrir el puerto serial:", e)
 
-
     def parse_serial_block(self, data_block):
         try:
             lines = data_block.strip().splitlines()
