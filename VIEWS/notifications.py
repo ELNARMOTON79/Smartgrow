@@ -7,11 +7,14 @@ from os import path
 from notifypy import Notify
 from customtkinter import CTkImage
 from PIL import Image
+from settings import CustomView
+
 
 
 class Notifications:
-    def __init__(self, parent):
+    def __init__(self, parent, custom_view_instance):
         self.frame = ctk.CTkFrame(parent, fg_color=COLORS.card, corner_radius=15)
+        self.custom_view = custom_view_instance
         
         # Header
         ctk.CTkLabel(
@@ -143,19 +146,25 @@ class Notifications:
         except Exception as e:
             print("❌ Error al analizar datos:", e)
 
-    notification = Notify()
-    notification.title = "Smartgrow"
-    notification.message = "temperature: 25.5°C"
 
-    icono = path.join("../Sources/logonoti.png")
-    audio = path.join("../audio/sonidonoti.wav")
+def check_and_notify(self, key, value):
+    try:
+        # Convertir valor a número flotante
+        val_num = float(value.replace("°C", "").replace("mS/cm", "").replace("cm", "").strip())
 
-    direcion = path.abspath(path.dirname(__file__))
+        rango = self.settings.get(key)
+        if rango and (val_num < rango[0] or val_num > rango[1]):
+            notification = Notify()
+            notification.title = "Smartgrow"
+            notification.message = f"⚠ {key} fuera de rango: {value}"
 
-    notification.audio = path.join(direcion, audio)
-    notification.icon = path.join(direcion, icono)
+            direccion = path.abspath(path.dirname(__file__))
+            notification.audio = path.join(direccion, "../audio/sonidonoti.wav")
+            notification.icon = path.join(direccion, "../Sources/logonoti.png")
 
-    notification.send()
+            notification.send()
+    except Exception as e:
+        print(f"❌ Error al verificar y notificar {key}: {e}")
 
     
 
