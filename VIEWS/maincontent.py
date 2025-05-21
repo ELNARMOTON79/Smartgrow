@@ -29,10 +29,11 @@ class MainContent:
         self.content_container.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Initialize views
+        self.custom_view = CustomView(self.content_container)
         self.dashboard = Dashboard(self.content_container)
         self.history = History(self.content_container)
-        self.notifications = Notifications(self.content_container)
-        self.custom_view = CustomView(self.content_container)
+        self.notifications = Notifications(self.content_container, self.custom_view)
+
         
         # Store views in dictionary for easy access
         self.views = {
