@@ -2,6 +2,10 @@ import customtkinter as ctk
 from VIEWS.colors import COLORS
 from typing import Dict, List
 from datetime import datetime
+from PIL import Image
+import os
+import pygame
+import threading
 
 class Notifications:
     def __init__(self, parent, custom_view=None):
@@ -9,6 +13,32 @@ class Notifications:
         self.arduino_controller = None
         self.alerts_history = []
         self.custom_view = custom_view  # Store reference if needed
+        
+        # Initialize pygame mixer for sound
+        try:
+            pygame.mixer.init()
+        except Exception as e:
+            print(f"Error initializing pygame mixer: {e}")
+        
+        # Load alert icon
+        self.alert_image = None
+        try:
+            image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "imagenes", "iconoo.jpg")
+            if os.path.exists(image_path):
+                pil_image = Image.open(image_path)
+                pil_image = pil_image.resize((32, 32), Image.Resampling.LANCZOS)
+                self.alert_image = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=(32, 32))
+        except Exception as e:
+            print(f"Error loading alert icon: {e}")
+        
+        # Load alert sound
+        self.alert_sound = None
+        try:
+            sound_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "audio", "sonidonoti.wav")
+            if os.path.exists(sound_path):
+                self.alert_sound = pygame.mixer.Sound(sound_path)
+        except Exception as e:
+            print(f"Error loading alert sound: {e}")
         
         # Title
         title_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
@@ -56,7 +86,17 @@ class Notifications:
             width=100, height=30,
             font=ctk.CTkFont(size=12)
         )
-        clear_btn.pack(side="right")
+        clear_btn.pack(side="right", padx=(5, 0))
+        
+        # Test alert button
+        test_btn = ctk.CTkButton(
+            header_frame, text="🧪 Prueba",
+            command=self.create_test_alert,
+            width=100, height=30,
+            font=ctk.CTkFont(size=12),
+            fg_color=COLORS.primary
+        )
+        test_btn.pack(side="right")
         
         # Scrollable alert history
         self.history_scroll = ctk.CTkScrollableFrame(
@@ -82,8 +122,24 @@ class Notifications:
             except Exception as e:
                 print(f"Error setting alert callback: {e}")
 
+    def play_alert_sound(self):
+        """Play alert sound in a separate thread"""
+        def play_sound():
+            try:
+                if self.alert_sound:
+                    self.alert_sound.play()
+            except Exception as e:
+                print(f"Error playing alert sound: {e}")
+        
+        # Play sound in separate thread to avoid blocking UI
+        sound_thread = threading.Thread(target=play_sound, daemon=True)
+        sound_thread.start()
+
     def handle_alert(self, alert_data: Dict):
         """Handle new alert from Arduino controller"""
+        # Play alert sound
+        self.play_alert_sound()
+        
         # Add to history
         self.alerts_history.insert(0, alert_data)
         
@@ -115,10 +171,20 @@ class Notifications:
         icon = severity_icons.get(severity, "⚠️")
         color = severity_colors.get(severity, "#EF4444")
         
-        self.current_alert_label.configure(
-            text=f"{icon} {alert_data['message']}",
-            text_color=color
-        )
+        # Update text and show image if available
+        alert_text = f"{icon} {alert_data['message']}"
+        if self.alert_image:
+            self.current_alert_label.configure(
+                text=alert_text,
+                text_color=color,
+                image=self.alert_image,
+                compound="left"
+            )
+        else:
+            self.current_alert_label.configure(
+                text=alert_text,
+                text_color=color
+            )
         
         # Clear alert after 15 seconds
         self.frame.after(15000, self.clear_current_alert)
@@ -127,7 +193,8 @@ class Notifications:
         """Clear current alert display"""
         self.current_alert_label.configure(
             text="✅ Sin alertas activas",
-            text_color=COLORS.primary
+            text_color=COLORS.primary,
+            image=""
         )
 
     def update_history_display(self):
@@ -184,6 +251,43 @@ class Notifications:
         """Clear alert history"""
         self.alerts_history.clear()
         self.update_history_display()
+
+    def create_test_alert(self):
+        """Create a test alert to verify sound and image functionality"""
+        import random
+        
+        test_alerts = [
+            {
+                "message": "Temperatura crítica detectada",
+                "sensor": "temperatura",
+                "value": "35.2°C",
+                "type": "Temperatura alta",
+                "severity": "high",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            },
+            {
+                "message": "Humedad del suelo baja",
+                "sensor": "humedad_suelo",
+                "value": "15%",
+                "type": "Humedad baja",
+                "severity": "medium",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            },
+            {
+                "message": "Nivel de luz insuficiente",
+                "sensor": "luz",
+                "value": "120 lux",
+                "type": "Luz baja",
+                "severity": "low",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        ]
+        
+        # Select random test alert
+        test_alert = random.choice(test_alerts)
+        
+        # Trigger the alert through the normal alert handling system
+        self.handle_alert(test_alert)
 
     def get_frame(self):
         """Return the main frame"""
