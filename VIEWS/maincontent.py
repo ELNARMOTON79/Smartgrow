@@ -5,10 +5,11 @@ from VIEWS.history import History
 from VIEWS.notifications import Notifications
 from VIEWS.settings import CustomView
 
-class MainContent:
-    def __init__(self, master):
+class MainContent(ctk.CTkFrame):
+    def __init__(self, parent, on_settings_saved=None):
+        super().__init__(parent)
         # Main container
-        self.frame = ctk.CTkFrame(master=master, fg_color=COLORS.background)
+        self.frame = ctk.CTkFrame(master=parent, fg_color=COLORS.background)
         self.frame.pack(side="left", fill="both", expand=True)
 
         # Header
@@ -29,7 +30,7 @@ class MainContent:
         self.content_container.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Initialize views
-        self.custom_view = CustomView(self.content_container)
+        self.custom_view = CustomView(self.content_container, on_settings_saved=on_settings_saved)
         self.dashboard = Dashboard(self.content_container)
         self.history = History(self.content_container)
         self.notifications = Notifications(self.content_container, self.custom_view)
@@ -66,3 +67,14 @@ class MainContent:
     def show_custom_view(self, text):
         self.custom_view.update_content(text)
         self.show_view("custom")
+
+    def update_sensor_display(self, sensor_data):
+        # Forward sensor data to dashboard (and other views if needed)
+        if hasattr(self.dashboard, "update_sensor_display"):
+            self.dashboard.update_sensor_display(sensor_data)
+        # Optionally, update other views if needed
+
+    def show_alert(self, alert_data):
+        if hasattr(self, "notifications"):
+            self.notifications.handle_alert(alert_data)
+        # ...puedes agregar lógica para mostrar en otro lado si lo deseas...

@@ -11,17 +11,24 @@ class Sidebar:
         self.frame.pack_propagate(False)
         
         # App logo/title
-        icon_image = Image.open("./Sources/iconoo.jpg")
-        icon_image = icon_image.resize((40, 30))  # Ajusta el tamaño del ícono
-        icon_ctk = ctk.CTkImage(light_image=icon_image, dark_image=icon_image, size=(40, 60))
         logo_frame = ctk.CTkFrame(self.frame, fg_color="transparent", height=60)
         logo_frame.pack(fill="x")
         logo_frame.pack_propagate(False)
         
+        try:
+            icon_image = Image.open("./Sources/iconoo.jpg")
+            icon_image = icon_image.resize((40, 30))
+            icon_ctk = ctk.CTkImage(light_image=icon_image, dark_image=icon_image, size=(40, 30))
+            
+            icon_label = ctk.CTkLabel(logo_frame, image=icon_ctk, text="")
+            icon_label.pack(side="left", padx=(20, 10))
+        except Exception as e:
+            print(f"Error loading sidebar icon: {e}")
+        
         ctk.CTkLabel(
             logo_frame, text="Smartgrow", font=ctk.CTkFont(size=20, weight="bold"),
             text_color=COLORS.primary
-        ).pack(side="left", padx=20)
+        ).pack(side="left")
         
         # Navigation menu
         self.nav_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
