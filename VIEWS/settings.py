@@ -59,13 +59,15 @@ class CustomView:
 
     def _create_labeled_range(self, parent, label, validate_command):
         container = ctk.CTkFrame(parent, fg_color=COLORS.background)
-        container.pack(fill="x", pady=5, padx=10)
+        container.pack(pady=5)  # quitamos fill="x" para que no se expanda, y quede centrado
 
-        ctk.CTkLabel(container, text=label, text_color=COLORS.text_dark).pack(anchor="w")
+        # Etiqueta centrada
+        ctk.CTkLabel(container, text=label, text_color=COLORS.text_dark).pack(anchor="center", pady=(0, 2))
 
         range_frame = ctk.CTkFrame(container, fg_color=COLORS.background)
-        range_frame.pack(fill="x")
+        range_frame.pack()
 
+        # Entradas min y max centradas con grid
         min_entry = ctk.CTkEntry(
             range_frame,
             fg_color=COLORS.card,
@@ -75,8 +77,9 @@ class CustomView:
             validate="key",
             validatecommand=(validate_command, "%P")
         )
-        min_entry.pack(side="left", padx=(0, 5), pady=2)
-        ctk.CTkLabel(range_frame, text="mín", text_color=COLORS.text_dark).pack(side="left", padx=(0, 10))
+        min_entry.grid(row=0, column=0, padx=(0, 5), pady=2)
+
+        ctk.CTkLabel(range_frame, text="mín", text_color=COLORS.text_dark).grid(row=0, column=1, padx=(0, 15))
 
         max_entry = ctk.CTkEntry(
             range_frame,
@@ -87,8 +90,9 @@ class CustomView:
             validate="key",
             validatecommand=(validate_command, "%P")
         )
-        max_entry.pack(side="left", padx=(0, 5), pady=2)
-        ctk.CTkLabel(range_frame, text="máx", text_color=COLORS.text_dark).pack(side="left")
+        max_entry.grid(row=0, column=2, padx=(0, 5), pady=2)
+
+        ctk.CTkLabel(range_frame, text="máx", text_color=COLORS.text_dark).grid(row=0, column=3)
 
         return min_entry, max_entry
 
