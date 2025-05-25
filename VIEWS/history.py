@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from VIEWS.colors import COLORS
 import tkinter.ttk as ttk 
+import datetime
 
 class History:
     def __init__(self, parent):
@@ -32,32 +33,68 @@ class History:
             text_color=COLORS.text_dark
         ).pack(pady=20)
 
-    import tkinter.ttk as ttk  # Asegúrate de tener esta línea al inicio del archivo
-
     def _crear_filtros(self):
+        try:
+            from tkcalendar import DateEntry
+            self.tkcalendar_available = True
+        except ImportError:
+            self.tkcalendar_available = False
+        import datetime
         filtro_frame = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
         filtro_frame.pack(fill="x", padx=20, pady=(0, 15))
 
-        self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        # Elimina el filtro de día de la semana
+        # self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.hora_opciones = ["All"] + [f"{(h % 12) or 12}:00 {'AM' if h < 12 else 'PM'}" for h in range(0, 24)]
 
         filtros_y_boton = ctk.CTkFrame(filtro_frame, fg_color="transparent")
         filtros_y_boton.pack(padx=10, pady=10, fill="x")
 
+        # Ajusta las columnas: ahora solo hay 4 (fecha, from, to, botón)
         filtros_y_boton.grid_columnconfigure((0, 1, 2, 3), weight=1, uniform="filtros")
+
+        # Elimina el filtro de día de la semana
+        # def crear_filtro(label_text, opciones, col):
+        #     sub_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
+        #     sub_frame.grid(row=0, column=col, padx=5, pady=5, sticky="nsew")
+        #     ctk.CTkLabel(sub_frame, text=label_text, text_color=COLORS.text_dark).pack()
+        #     combo = ttk.Combobox(sub_frame, values=opciones, state="readonly", width=18)
+        #     combo.set("All")
+        #     combo.pack(ipady=6, fill="x",padx=4)
+        #     return combo
+
+        # self.dia_filtro = crear_filtro("Day", self.dia_opciones, 0)
+
+        # Calendario para seleccionar fecha (si está disponible)
+        cal_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
+        cal_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        ctk.CTkLabel(cal_frame, text="Date", text_color=COLORS.text_dark).pack()
+        if self.tkcalendar_available:
+            self.fecha_filtro = DateEntry(
+                cal_frame,
+                width=21,  # Ajusta el ancho para que coincida visualmente con los Combobox (por defecto 18)
+                background='darkblue',
+                foreground='white',
+                borderwidth=2,
+                date_pattern='yyyy-mm-dd',
+                showothermonthdays=True,
+                showweeknumbers=True,
+            )
+            self.fecha_filtro.set_date(datetime.date.today())
+            self.fecha_filtro.pack(fill="x", padx=4, ipady=6)  # Usa ipady=6 igual que los Combobox
+        else:
+            self.fecha_filtro = None
+            ctk.CTkLabel(cal_frame, text="tkcalendar\nnot installed", text_color="red").pack()
 
         def crear_filtro(label_text, opciones, col):
             sub_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
             sub_frame.grid(row=0, column=col, padx=5, pady=5, sticky="nsew")
             ctk.CTkLabel(sub_frame, text=label_text, text_color=COLORS.text_dark).pack()
-
-            # Combobox de ttk con scroll automático
             combo = ttk.Combobox(sub_frame, values=opciones, state="readonly", width=18)
             combo.set("All")
-            combo.pack(ipady=6, fill="x",padx=4)  # padding interno para apariencia decente
+            combo.pack(ipady=6, fill="x",padx=4)
             return combo
 
-        self.dia_filtro = crear_filtro("Day", self.dia_opciones, 0)
         self.hora_inicio = crear_filtro("From", self.hora_opciones, 1)
         self.hora_fin = crear_filtro("To", self.hora_opciones, 2)
 
@@ -102,21 +139,26 @@ class History:
         self.btn_siguiente.pack(side="left", padx=10)
 
     def aplicar_filtro(self):
-        dia = self.dia_filtro.get()
+        # Elimina la referencia al filtro de día de la semana
+        # dia = self.dia_filtro.get()
+        fecha = self.fecha_filtro.get() if self.fecha_filtro else None
         hora_inicio = self.hora_inicio.get()
         hora_fin = self.hora_fin.get()
 
         self.datos_filtrados = []
 
         for row in self.datos:
-            dia_match = (dia == "All" or row[0] == dia)
+            # Elimina el filtro de día de la semana
+            # dia_match = (dia == "All" or row[0] == dia)
+            fecha_match = True  # Cambia esto si agregas la fecha a tus datos
             hora_match = True
             if hora_inicio != "All" and row[1] < hora_inicio:
                 hora_match = False
             if hora_fin != "All" and row[1] > hora_fin:
                 hora_match = False
 
-            if dia_match and hora_match:
+            # if dia_match and fecha_match and hora_match:
+            if fecha_match and hora_match:
                 self.datos_filtrados.append(row)
 
         self.pagina_actual = 0

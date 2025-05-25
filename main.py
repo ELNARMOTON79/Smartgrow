@@ -26,6 +26,7 @@ class App(ctk.CTk):
         # Configure window
         self.title("Smartgrow - Sistema hidroponía")
         self.geometry("1200x700")
+        
         self.minsize(900, 600)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         
