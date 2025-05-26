@@ -24,7 +24,10 @@ class ArduinoController:
                 self.serial.write(b'READ_SENSORS\n')
                 line = self.serial.readline().decode('utf-8').strip()
                 if line.startswith('{') and line.endswith('}'):
-                    return json.loads(line)
+                    sensor_data = json.loads(line)
+                    # Guarda los datos en la base de datos
+                    self.process_sensor_data(sensor_data)
+                    return sensor_data
             except Exception as e:
                 print(f"Error reading from Arduino: {e}")
         return None
@@ -32,3 +35,4 @@ class ArduinoController:
     def disconnect(self):
         if self.serial and self.serial.is_open:
             self.serial.close()
+

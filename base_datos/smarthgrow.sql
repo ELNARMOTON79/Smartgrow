@@ -1,107 +1,42 @@
--- Tabla Luz
-CREATE TABLE IF NOT EXISTS `Luz` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `estado` varchar(500) NOT NULL
+-- Tabla de sensores
+CREATE TABLE sensores (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    tipo VARCHAR(50) NOT NULL, -- Ej: temperatura, humedad, luz, etc.
+    descripcion TEXT
 );
 
--- Tabla NivelAgua
-CREATE TABLE IF NOT EXISTS `NivelAgua` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `id_sensor` bigint NOT NULL,
-  `valor` decimal(10, 2) NOT NULL
+-- Tabla de historial (almacena todos los valores de sensores por registro)
+CREATE TABLE historial (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    temperatura FLOAT,
+    ph FLOAT,
+    conductividad FLOAT,
+    nivel_agua FLOAT
 );
 
-CREATE INDEX `idx_nivel_agua_id_sensor` ON `NivelAgua` (`id_sensor`);
-
--- Tabla ConductividadElectrica
-CREATE TABLE IF NOT EXISTS `ConductividadElectrica` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `id_sensor` bigint NOT NULL,
-  `valor` decimal(10, 2) NOT NULL
+-- Tabla de notificaciones
+CREATE TABLE notificaciones (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    sensor_id INT, -- Relaciona la notificación con un sensor específico
+    mensaje TEXT NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    leida BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sensor_id) REFERENCES sensores(id)
 );
 
-CREATE INDEX `idx_conductividad_id_sensor` ON `ConductividadElectrica` (`id_sensor`);
+-- Inserts para la tabla sensores
+INSERT INTO sensores (nombre, tipo, descripcion) VALUES
+('Sensor de Temperatura', 'temperatura', 'Sensor para medir la temperatura del ambiente o solución.'),
+('Sensor de pH', 'ph', 'Sensor para medir el nivel de pH de la solución.'),
+('Sensor de Electroconductividad', 'electroconductividad', 'Sensor para medir la conductividad eléctrica de la solución.'),
+('Sensor Ultrasónico', 'ultrasonico', 'Sensor para medir la distancia o nivel de líquido mediante ultrasonido.');
 
--- Tabla PH
-CREATE TABLE IF NOT EXISTS `PH` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `valor` decimal(10, 2) NOT NULL,
-  `id_sensor` bigint NOT NULL
-);
-
-CREATE INDEX `idx_ph_id_sensor` ON `PH` (`id_sensor`);
-
--- Tabla Temperatura
-CREATE TABLE IF NOT EXISTS `Temperatura` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `id_sensor` bigint NOT NULL,
-  `valor` decimal(10, 2) NOT NULL
-);
-
-CREATE INDEX `idx_temperatura_id_sensor` ON `Temperatura` (`id_sensor`);
-
--- Tabla Ventiladores
-CREATE TABLE IF NOT EXISTS `Ventiladores` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `estado` varchar(500) NOT NULL,
-  `temperatura` decimal(10, 2) NOT NULL
-);
-
-CREATE INDEX `idx_ventiladores_temperatura` ON `Ventiladores` (`temperatura`);
-
--- Tabla Humedad
-CREATE TABLE IF NOT EXISTS `Humedad` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `porcentaje` decimal(10, 2) NOT NULL,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `sensor_id` bigint NOT NULL
-);
-
-CREATE INDEX `idx_humedad_sensor_id` ON `Humedad` (`sensor_id`);
-
--- Tabla Oxigeno
-CREATE TABLE IF NOT EXISTS `Oxigeno` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `valor` decimal(10, 2) NOT NULL,
-  `id_sensor` bigint NOT NULL
-);
-
-CREATE INDEX `idx_oxigeno_id_sensor` ON `Oxigeno` (`id_sensor`);
-
--- Tabla Sensores
-CREATE TABLE IF NOT EXISTS `Sensores` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `sensor` varchar(500) NOT NULL,
-  `tipo_sensor` varchar(500) NOT NULL
-);
-
--- Tabla Bomba
-CREATE TABLE IF NOT EXISTS `Bomba` (
-  `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `fecha` date DEFAULT NULL,
-  `hora` time NOT NULL,
-  `estado` varchar(500) NOT NULL
-);
-
--- Restricciones de clave foránea
-ALTER TABLE `NivelAgua` ADD CONSTRAINT `fk_nivel_agua_sensor` FOREIGN KEY (`id_sensor`) REFERENCES `Sensores` (`id`);
-ALTER TABLE `ConductividadElectrica` ADD CONSTRAINT `fk_conductividad_sensor` FOREIGN KEY (`id_sensor`) REFERENCES `Sensores` (`id`);
-ALTER TABLE `PH` ADD CONSTRAINT `fk_ph_sensor` FOREIGN KEY (`id_sensor`) REFERENCES `Sensores` (`id`);
-ALTER TABLE `Temperatura` ADD CONSTRAINT `fk_temperatura_sensor` FOREIGN KEY (`id_sensor`) REFERENCES `Sensores` (`id`);
-ALTER TABLE `Humedad` ADD CONSTRAINT `fk_humedad_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `Sensores` (`id`);
-ALTER TABLE `Oxigeno` ADD CONSTRAINT `fk_oxigeno_sensor` FOREIGN KEY (`id_sensor`) REFERENCES `Sensores` (`id`);
+-- Ejemplo de insert para historial
+INSERT INTO historial (fecha, hora, temperatura, ph, conductividad, nivel_agua) VALUES
+('2024-06-01', '08:00:00', 22.5, 6.2, 1300, 12.5),
+('2024-06-01', '12:00:00', 24.1, 6.3, 1400, 12.7),
+('2024-06-02', '08:00:00', 21.8, 6.1, 1250, 12.4),
+('2024-06-02', '12:00:00', 23.0, 6.4, 1350, 12.6);
