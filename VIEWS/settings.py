@@ -79,7 +79,7 @@ class CustomView:
         ).pack(side="left", padx=5)
 
         ctk.CTkButton(
-            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.danger,
+            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.button_intensity,  # Cambiado a azul claro
             text_color="white", command=self.adjust_intensity
         ).pack(side="left", padx=5)
 
