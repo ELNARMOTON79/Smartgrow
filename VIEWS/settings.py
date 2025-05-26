@@ -22,10 +22,36 @@ class CustomView:
         content = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
         content.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
-        # Inputs: ahora son rangos (min y max) para cada parámetro
-        self.ph_min_entry, self.ph_max_entry = self._create_labeled_range(content, "pH ideal:", self.vcmd_ph)
-        self.temp_min_entry, self.temp_max_entry = self._create_labeled_range(content, "Temperatura ideal (°C):", self.vcmd_2digit)
-        self.ec_min_entry, self.ec_max_entry = self._create_labeled_range(content, "Electroconductividad ideal (μS/cm):", self.vcmd_2digit)
+        # --- Etiquetas con signo de interrogación y ayuda ---
+        label_frame_ph = ctk.CTkFrame(content, fg_color=COLORS.background)
+        label_frame_ph.pack(pady=(10, 0))
+        ctk.CTkLabel(label_frame_ph, text="pH ideal:", text_color=COLORS.text_dark).pack(side="left")
+        ctk.CTkButton(
+            label_frame_ph, text="❓", width=24, height=24, fg_color=COLORS.primary, text_color="white",
+            command=lambda: self.show_help("ph")
+        ).pack(side="left", padx=(5, 0))
+
+        self.ph_min_entry, self.ph_max_entry = self._create_labeled_range(content, "", self.vcmd_ph)
+
+        label_frame_temp = ctk.CTkFrame(content, fg_color=COLORS.background)
+        label_frame_temp.pack(pady=(10, 0))
+        ctk.CTkLabel(label_frame_temp, text="Temperatura ideal (°C):", text_color=COLORS.text_dark).pack(side="left")
+        ctk.CTkButton(
+            label_frame_temp, text="❓", width=24, height=24, fg_color=COLORS.primary, text_color="white",
+            command=lambda: self.show_help("temperatura")
+        ).pack(side="left", padx=(5, 0))
+
+        self.temp_min_entry, self.temp_max_entry = self._create_labeled_range(content, "", self.vcmd_2digit)
+
+        label_frame_ec = ctk.CTkFrame(content, fg_color=COLORS.background)
+        label_frame_ec.pack(pady=(10, 0))
+        ctk.CTkLabel(label_frame_ec, text="Electroconductividad ideal (μS/cm):", text_color=COLORS.text_dark).pack(side="left")
+        ctk.CTkButton(
+            label_frame_ec, text="❓", width=24, height=24, fg_color=COLORS.primary, text_color="white",
+            command=lambda: self.show_help("ec")
+        ).pack(side="left", padx=(5, 0))
+
+        self.ec_min_entry, self.ec_max_entry = self._create_labeled_range(content, "", self.vcmd_2digit)
 
         # Botón de guardar
         save_btn = ctk.CTkButton(
@@ -168,3 +194,17 @@ class CustomView:
         if value == "":
             return True
         return value.isdigit() and len(value) <= 2
+
+    def show_help(self, key):
+        from CTkMessagebox import CTkMessagebox
+        help_texts = {
+            "ph": "El pH indica el nivel de acidez o alcalinidad del agua.",
+            "temperatura": "La temperatura ideal del agua favorece el crecimiento y la salud de las plantas.",
+            "ec": "La electroconductividad (EC) mide la concentración de sales y nutrientes disueltos en el agua.",
+        }
+        CTkMessagebox(
+            title="¿Qué es?",
+            message=help_texts.get(key, "Sin información disponible."),
+            icon="info",
+            option_1="Cerrar"
+        )
