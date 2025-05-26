@@ -356,17 +356,56 @@ class Configuration:
             self.show_message("❌ No hay controlador Arduino disponible", COLORS.danger)
 
     def show_message(self, message: str, color: str):
-        """Show temporary message"""
-        # Create temporary message label
-        msg_label = ctk.CTkLabel(
-            self.frame, text=message,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=color
+        """Show a modal dialog with the message"""
+        modal = ctk.CTkToplevel(self.frame)
+        modal.title("Mensaje")
+        modal.geometry("400x150")
+        modal.resizable(False, False)
+        modal.grab_set()  # Modal
+
+        # Center modal relative to parent
+        modal.update_idletasks()
+        x = self.frame.winfo_rootx() + (self.frame.winfo_width() // 2) - (modal.winfo_width() // 2)
+        y = self.frame.winfo_rooty() + (self.frame.winfo_height() // 2) - (modal.winfo_height() // 2)
+        modal.geometry(f"+{x}+{y}")
+
+        # Content frame
+        content = ctk.CTkFrame(modal, fg_color=COLORS.background, corner_radius=10)
+        content.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Icon and message
+        row = ctk.CTkFrame(content, fg_color="transparent")
+        row.pack(fill="x", pady=(10, 0), padx=10)
+
+        # Info icon (blue circle with "i")
+        icon = ctk.CTkLabel(
+            row, text="🛈",  # Unicode info icon, or use "ℹ️"
+            font=ctk.CTkFont(size=36, weight="bold"),
+            text_color="#2563eb"  # blue-600
         )
-        msg_label.place(relx=0.5, rely=0.95, anchor="center")
-        
-        # Remove after 3 seconds
-        self.frame.after(3000, msg_label.destroy)
+        icon.pack(side="left", padx=(0, 15))
+
+        msg = ctk.CTkLabel(
+            row, text=message,
+            font=ctk.CTkFont(size=14),
+            text_color=color,
+            wraplength=260,
+            justify="left"
+        )
+        msg.pack(side="left", fill="x", expand=True)
+
+        # Close button
+        btn = ctk.CTkButton(
+            content, text="Cerrar",
+            command=modal.destroy,
+            width=120,
+            height=36
+        )
+        btn.pack(side="bottom", pady=(15, 10))
+
+        btn.focus_set()
+        modal.transient(self.frame)
+        modal.wait_window()
 
     def get_frame(self):
         """Return the main frame"""
