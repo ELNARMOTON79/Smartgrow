@@ -126,6 +126,17 @@ class Dashboard:
         self.ax.set_ylabel("Valor")
         self.ax.grid(True, alpha=0.3)
         self.ax.set_xlim(left=max(0, len(x) - 20), right=len(x))  # Avanzar conforme llegan datos
+        
+        # Cambiar etiqueta del eje X dinámicamente entre segundos y minutos
+        if len(x) * 5 < 60:  # Si el rango total es menor a 1 minuto
+            self.ax.set_xlabel("Tiempo (s)")
+            self.ax.set_xticks([i for i in range(len(x))])  # Ajustar ticks del eje X
+            self.ax.set_xticklabels([f"{i * 5}" for i in range(len(x))])  # Mostrar en segundos
+        else:  # Si el rango total es mayor o igual a 1 minuto
+            self.ax.set_xlabel("Tiempo (min)")
+            self.ax.set_xticks([i for i in range(len(x))])  # Ajustar ticks del eje X
+            self.ax.set_xticklabels([f"{i * 5 / 60:.1f}" for i in range(len(x))])  # Mostrar en minutos
+        
         self.fig.tight_layout()
         self.canvas.draw()
 
