@@ -269,6 +269,11 @@ class Configuration:
             if self.arduino_controller:
                 self.arduino_controller.update_thresholds(config["sensor_thresholds"])
                 print(f"Updated thresholds in Arduino controller: {config['sensor_thresholds']}")
+                
+                # Send ideal ranges for pH and EC to Arduino
+                ph_range = config["sensor_thresholds"].get("ph", {})
+                ec_range = config["sensor_thresholds"].get("ec", {})
+                self.arduino_controller.send_ideal_ranges(ph_range, ec_range)
             
             # Update notifications view to refresh with new thresholds
             if self.notifications_view:

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from customtkinter import CTkImage
 from PIL import Image, ImageTk
 import os
 from VIEWS.colors import COLORS
@@ -36,10 +37,10 @@ class Dashboard:
         self.stats_help_buttons = {}
 
         stats_data = [
-            {"title": "Temperature", "value": "Waiting...", "icon": "🌡️", "color": COLORS.primary, "help_key": "temperature"},
-            {"title": "pH", "value": "Waiting...", "icon": "🧪", "color": COLORS.secondary, "help_key": "ph"},
-            {"title": "Conductivity", "value": "Waiting...", "icon": "⚡", "color": "#F59E0B", "help_key": "ec"},
-            {"title": "Water Level", "value": "Waiting...", "icon": "🧊", "color": "#3B82F6", "help_key": "water_level"},
+            {"title": "Temperatura", "value": "Esperando...", "icon": "🌡️", "color": COLORS.primary, "help_key": "temperature"},
+            {"title": "pH", "value": "Esperando...", "icon": "🧪", "color": COLORS.secondary, "help_key": "ph"},
+            {"title": "Conductividad", "value": "Esperando...", "icon": "⚡", "color": "#F59E0B", "help_key": "ec"},
+            {"title": "Nivel de Agua", "value": "Esperando...", "icon": "🧊", "color": "#3B82F6", "help_key": "water_level"},
         ]
 
         for stat in stats_data:
@@ -48,7 +49,7 @@ class Dashboard:
             self.stats_labels[stat["title"]] = value_label
             self.stats_help_buttons[stat["title"]] = help_btn
 
-        # Middle section for status and alerts (fixed height)
+        # Sección intermedia para estado y alertas (altura fija)
         middle_section = ctk.CTkFrame(main_container, fg_color="transparent", height=60)
         middle_section.pack(fill="x", pady=(0, 10))
         middle_section.pack_propagate(False)  # Maintain fixed height
@@ -79,8 +80,9 @@ class Dashboard:
         self.chart_frame = chart_section
         self._init_chart(chart_section)
 
-        # Si no hay controlador, cargar datos de simulación para mostrar el diseño
-        self.load_simulation_data()
+        # Si no hay controlador, no cargar datos de simulación
+        if self.arduino_controller:
+            self.refresh_data()
 
     def _init_chart(self, parent):
         """Inicializa la gráfica de sensores"""
@@ -106,6 +108,10 @@ class Dashboard:
             self.ax.set_title("Esperando datos de sensores...")
             self.canvas.draw()
             return
+        
+        # Variables para calcular los límites dinámicos del eje Y
+        all_values = []
+
         # Graficar cada sensor si hay datos
         for key, label, color, lw in [
             ("Temperature", "Temperatura (°C)", "tab:red", 2),
@@ -114,11 +120,31 @@ class Dashboard:
             ("Water Level", "Nivel Agua (cm)", "tab:cyan", 2),
         ]:
             if len(self.sensor_history[key]) > 0:
-                self.ax.plot(x, self.sensor_history[key], label=label, color=color, linewidth=lw)
+                self.ax.plot(x, self.sensor_history[key], label=label, color=color, linewidth=lw, marker='o')
+                all_values.extend(self.sensor_history[key])  # Agregar valores para calcular límites
+
+        # Ajustar límites del eje Y dinámicamente
+        if all_values:
+            min_y = min(all_values) - 1  # Margen inferior
+            max_y = max(all_values) + 1  # Margen superior
+            self.ax.set_ylim(min_y, max_y)
+
         self.ax.legend(loc="upper left")
         self.ax.set_xlabel("Tiempo (min)")
         self.ax.set_ylabel("Valor")
         self.ax.grid(True, alpha=0.3)
+        self.ax.set_xlim(left=max(0, len(x) - 20), right=len(x))  # Avanzar conforme llegan datos
+        
+        # Cambiar etiqueta del eje X dinámicamente entre segundos y minutos
+        if len(x) * 5 < 60:  # Si el rango total es menor a 1 minuto
+            self.ax.set_xlabel("Tiempo (s)")
+            self.ax.set_xticks([i for i in range(len(x))])  # Ajustar ticks del eje X
+            self.ax.set_xticklabels([f"{i * 5}" for i in range(len(x))])  # Mostrar en segundos
+        else:  # Si el rango total es mayor o igual a 1 minuto
+            self.ax.set_xlabel("Tiempo (min)")
+            self.ax.set_xticks([i for i in range(len(x))])  # Ajustar ticks del eje X
+            self.ax.set_xticklabels([f"{i * 5 / 60:.1f}" for i in range(len(x))])  # Mostrar en minutos
+        
         self.fig.tight_layout()
         self.canvas.draw()
 
@@ -137,27 +163,25 @@ class Dashboard:
         
         # Map sensor data to display labels
         display_mapping = {
-            "temperature": ("Temperature", "°C"),
+            "temperature": ("Temperatura", "°C"),
             "ph": ("pH", ""),
-            "ec": ("Conductivity", "mS/cm"),
-            "water_level": ("Water Level", "cm"),
-            "humidity": ("Humidity", "%"),
-            "voltage": ("Voltage", "V")
+            "ec": ("Conductividad", "mS/cm"),
+            "water_level": ("Nivel de Agua", "cm"),
+            # Elimina claves no utilizadas como "humidity" y "voltage"
         }
         
         for sensor_key, (display_key, unit) in display_mapping.items():
             if sensor_key in sensor_data and display_key in self.stats_labels:
                 value = sensor_data[sensor_key]
                 if isinstance(value, (int, float)):
-                    formatted_value = f"{display_key}: {value:.2f} {unit}" if unit else f"{display_key}: {value:.2f}"
+                    formatted_value = f"{value:.2f} {unit}" if unit else f"{value:.2f}"
                 else:
-                    formatted_value = f"{display_key}: {str(value)}"
+                    formatted_value = str(value)
                 
+                # Actualiza la etiqueta correspondiente
                 self.stats_labels[display_key].configure(text=formatted_value)
         
         # Actualizar historial de sensores para la gráfica
-        # Se asume que cada llamada es una nueva medición
-        # Ahora x representa minutos simulados
         self.sensor_history["x"].append(len(self.sensor_history["x"]))
         for key, display_key in [
             ("temperature", "Temperature"),
@@ -222,6 +246,9 @@ class Dashboard:
         self.connection_status.configure(text=status_text, text_color=text_color)
 
     def _create_card(self, parent, title, value, icon, color, help_key):
+        # Convert icon to CTkImage if it's an image file
+        if isinstance(icon, str) and os.path.isfile(icon):
+            icon = CTkImage(Image.open(icon), size=(16, 16))  # Adjust size as needed
         # Corrige el icono de conductividad a ⚡
         if title == "Conductivity":
             icon = "⚡"
@@ -267,7 +294,7 @@ class Dashboard:
     def show_help_modal(self, key):
         help_texts = {
             "ph": "Indica si la solución nutritiva es ácida o alcalina que alimenta a las plantas.",
-            "temperature": "Mide el calor del ambiente o del agua, clave para el crecimiento.",
+            "temperature": "    Mide el calor del ambiente o del agua, \n     clave para el crecimiento.",
             "ec": "La electroconductividad (EC) mide la concentración de sales y nutrientes disueltas en el agua.",
             "water_level": "El nivel de agua óptimo asegura que las raíces estén bien hidratadas y oxigenadas.",
         }
@@ -350,21 +377,4 @@ class Dashboard:
             sensor_data = self.arduino_controller.read_sensors()
             if sensor_data:
                 self.update_sensor_display(sensor_data)
-
-    def load_simulation_data(self):
-        """Carga datos de simulación para previsualizar el dashboard"""
-        # Simula historial de 15 mediciones con valores diferenciados y claros
-        for i in range(15):
-            data = {
-                "temperature": 20.0 + i * 0.7,      # 20.0, 20.7, ..., 29.8
-                "ph": 5.5 + (i * 0.1),              # 5.5, 5.6, ..., 7.0
-                "ec": 1.0 + (i * 0.15),             # 1.0, 1.15, ..., 3.1
-                "water_level": 15.0 - i * 0.5,      # 15.0, 14.5, ..., 7.5
-                "humidity": 50.0 + (i % 5),         # 50, 51, ..., 54
-                "voltage": 12.0 + (i % 3) * 0.1,    # 12.0, 12.1, 12.2, ...
-                "status": "ok"
-            }
-            self.update_sensor_display(data)
-        # Muestra una alerta de simulación
-        self.show_alert("Simulación de datos activa", "low")
 

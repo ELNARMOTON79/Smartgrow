@@ -32,6 +32,12 @@ float calibrationConstant = 1.0;
 #define OFFSET_CALIBRACION_CM 1.5
 #define NIVEL_MINIMO_CM 5.0
 
+// --- Variables para rangos ideales ---
+float idealPHMin = 5.5;
+float idealPHMax = 7.5;
+float idealECMin = 1.2;
+float idealECMax = 2.5;
+
 void setup() {
   Serial.begin(9600);
   sensors.begin();
@@ -103,6 +109,7 @@ void loop() {
   if (Serial.available()) {
     String cmd = Serial.readStringUntil('\n');
     cmd.trim();
+
     if (cmd == "TEST") {
       Serial.println("OK");
     } else if (cmd == "READ_SENSORS") {
@@ -114,50 +121,67 @@ void loop() {
       Serial.print("\"pH\":"); Serial.print(phValue, 2); Serial.print(",");
       Serial.print("\"alertaNivel\":"); Serial.print(alertaNivel ? 1 : 0);
       Serial.println("}");
+    } else if (cmd.startsWith("ACTIVATE_PUMP")) {
+      int pumpNumber = cmd.substring(14).toInt(); // Extract pump number
+      if (pumpNumber == 1) {
+        digitalWrite(RELAY_PERISTALTICA_1, LOW); // Activa bomba peristáltica 1
+      } else if (pumpNumber == 2) {
+        digitalWrite(RELAY_PERISTALTICA_2, LOW); // Activa bomba peristáltica 2
+      } else if (pumpNumber == 3) {
+        digitalWrite(RELAY_PERISTALTICA_3, LOW); // Activa bomba peristáltica 3
+      }
+    } else if (cmd.startsWith("DEACTIVATE_PUMP")) {
+      int pumpNumber = cmd.substring(17).toInt(); // Extract pump number
+      if (pumpNumber == 1) {
+        digitalWrite(RELAY_PERISTALTICA_1, HIGH); // Apaga bomba peristáltica 1
+      } else if (pumpNumber == 2) {
+        digitalWrite(RELAY_PERISTALTICA_2, HIGH); // Apaga bomba peristáltica 2
+      } else if (pumpNumber == 3) {
+        digitalWrite(RELAY_PERISTALTICA_3, HIGH); // Apaga bomba peristáltica 3
+      }
     }
-    // Puedes agregar más comandos aquí si lo deseas
   }
 
-  // --- Salida Serial periódica para monitoreo humano (opcional) ---
-  // Serial.print("nivelAgua_cm:");
-  // Serial.print(nivelAgua, 2);
-  // Serial.print(",temp_C:");
-  // Serial.print(temperatura, 2);
-  // Serial.print(",EC_mS_cm:");
-  // Serial.print(ecValue, 2);
-  // Serial.print(",pH:");
-  // Serial.print(phValue, 2);
-  // Serial.print(",alertaNivel:");
-  // Serial.println(alertaNivel ? "1" : "0");
+  // --- Salida Serial periódica para monitoreo humano ---
+  Serial.print("nivelAgua_cm:");
+  Serial.print(nivelAgua, 2);
+  Serial.print(",temp_C:");
+  Serial.print(temperatura, 2);
+  Serial.print(",EC_mS_cm:");
+  Serial.print(ecValue, 2);
+  Serial.print(",pH:");
+  Serial.print(phValue, 2);
+  Serial.print(",alertaNivel:");
+  Serial.println(alertaNivel ? "1" : "0");
 
   // --- Ejemplo de control de bombas ---
-  // Activa la bomba de agua si el nivel es bajo
+  // El control automático de bombas puede ser desactivado si se usa el comando manual
   if (alertaNivel) {
     digitalWrite(RELAY_BOMBA_AGUA, LOW); // Activa bomba de agua
   } else {
     digitalWrite(RELAY_BOMBA_AGUA, HIGH); // Apaga bomba de agua
   }
 
-  // Ejemplo: activa peristáltica 1 si pH < 6.5
-  if (phValue < 6.5) {
-    digitalWrite(RELAY_PERISTALTICA_1, LOW); // Activa bomba peristáltica 1
+  // --- Control de bombas basado en rangos ideales ---
+  // Control de pH
+  if (phValue < idealPHMin) {
+    digitalWrite(RELAY_PERISTALTICA_1, LOW); // Activa bomba para subir pH
   } else {
-    digitalWrite(RELAY_PERISTALTICA_1, HIGH); // Apaga bomba peristáltica 1
+    digitalWrite(RELAY_PERISTALTICA_1, HIGH); // Apaga bomba para subir pH
   }
 
-  // Ejemplo: activa peristáltica 2 si pH > 7.5
-  if (phValue > 7.5) {
-    digitalWrite(RELAY_PERISTALTICA_2, LOW); // Activa bomba peristáltica 2
+  if (phValue > idealPHMax) {
+    digitalWrite(RELAY_PERISTALTICA_2, LOW); // Activa bomba para bajar pH
   } else {
-    digitalWrite(RELAY_PERISTALTICA_2, HIGH); // Apaga bomba peristáltica 2
+    digitalWrite(RELAY_PERISTALTICA_2, HIGH); // Apaga bomba para bajar pH
   }
 
-  // Ejemplo: activa peristáltica 3 si EC < 1.0
-  if (ecValue < 1.0) {
-    digitalWrite(RELAY_PERISTALTICA_3, LOW); // Activa bomba peristáltica 3
+  // Control de nutrientes (EC)
+  if (ecValue < idealECMin) {
+    digitalWrite(RELAY_PERISTALTICA_3, LOW); // Activa bomba para inyectar nutrientes
   } else {
-    digitalWrite(RELAY_PERISTALTICA_3, HIGH); // Apaga bomba peristáltica 3
+    digitalWrite(RELAY_PERISTALTICA_3, HIGH); // Apaga bomba para inyectar nutrientes
   }
 
-  delay(60000);  // Espera entre lecturas
+  delay(5000);  // Espera entre lecturas (5 segundos)
 }

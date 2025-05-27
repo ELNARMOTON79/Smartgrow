@@ -19,7 +19,7 @@ class MainContent(ctk.CTkFrame):
         
         self.title_label = ctk.CTkLabel(
             self.header, 
-            text="Dashboard", 
+            text="Tablero", 
             font=ctk.CTkFont(size=20, weight="bold"),
             text_color=COLORS.text_dark
         )
@@ -50,12 +50,12 @@ class MainContent(ctk.CTkFrame):
     def show_view(self, view_name):
         # Update header title
         titles = {
-            "home": "Dashboard",
-            "history": "",
-            "notifications": "",
-            "custom": ""
+            "home": "Tablero",
+            "history": "Historial",
+            "notifications": "Notificaciones",
+            "custom": "Personalizado"
         }
-        self.title_label.configure(text=titles.get(view_name, "Dashboard"))
+        self.title_label.configure(text=titles.get(view_name, "Tablero"))
         
         # Hide all views and show selected view
         for view in self.views.values():
