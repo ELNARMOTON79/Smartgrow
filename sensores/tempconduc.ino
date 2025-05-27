@@ -159,5 +159,5 @@ void loop() {
     digitalWrite(RELAY_PERISTALTICA_3, HIGH); // Apaga bomba peristáltica 3
   }
 
-  delay(1000);  // Espera entre lecturas
+  delay(60000);  // Espera entre lecturas
 }

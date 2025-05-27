@@ -4,6 +4,12 @@ import os
 from VIEWS.colors import COLORS
 from typing import Dict, Optional
 
+# Añadir imports para matplotlib
+import matplotlib
+matplotlib.use("Agg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+
 class Dashboard:
     def __init__(self, parent):
         self.frame = ctk.CTkFrame(parent, fg_color=COLORS.card, corner_radius=15)
@@ -58,35 +64,56 @@ class Dashboard:
         )
         self.alert_label.pack(side="right", anchor="e", pady=5)
         
-        # Bottom section for image (expandable)
-        image_section = ctk.CTkFrame(main_container, fg_color="transparent")
-        image_section.pack(fill="both", expand=True)
+        # Bottom section for chart (expandable)
+        chart_section = ctk.CTkFrame(main_container, fg_color="transparent")
+        chart_section.pack(fill="both", expand=True)
         
-        # Contenedor de imagen
-        self.image_label = ctk.CTkLabel(image_section, text="")
-        self.image_label.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # Bind resize event to the image section instead of frame
-        image_section.bind("<Configure>", self._resize_image)
-        
-        self.tk_image = None
-        self.original_image = None
-        image_path = "./Sources/fondo_light.png"
-        if os.path.exists(image_path):
-            try:
-                self.original_image = Image.open(image_path)
-                # Initial image size
-                self.ctk_image = ctk.CTkImage(
-                    light_image=self.original_image,
-                    dark_image=self.original_image,
-                    size=(600, 400)
-                )
-                self.image_label.configure(image=self.ctk_image)
-            except Exception as e:
-                print(f"Error loading image: {e}")
-                self.image_label.configure(text="Error cargando imagen", text_color=COLORS.danger)
-        else:
-            self.image_label.configure(text="Imagen no encontrada", text_color=COLORS.danger)
+        # Contenedor de gráfica
+        self.chart_frame = chart_section
+        self._init_chart(chart_section)
+
+        # Si no hay controlador, cargar datos de simulación para mostrar el diseño
+        self.load_simulation_data()
+
+    def _init_chart(self, parent):
+        """Inicializa la gráfica de sensores"""
+        self.fig, self.ax = plt.subplots(figsize=(6, 3))
+        self.fig.tight_layout()
+        self.sensor_history = {
+            "Temperature": [],
+            "pH": [],
+            "Conductivity": [],
+            "Water Level": [],
+            "x": []
+        }
+        self.canvas = FigureCanvasTkAgg(self.fig, master=parent)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(fill="both", expand=True, padx=10, pady=10)
+        self._update_chart()  # Dibuja la gráfica vacía
+
+    def _update_chart(self):
+        """Actualiza la gráfica con los datos actuales"""
+        self.ax.clear()
+        x = self.sensor_history["x"]
+        if len(x) == 0:
+            self.ax.set_title("Esperando datos de sensores...")
+            self.canvas.draw()
+            return
+        # Graficar cada sensor si hay datos
+        for key, label, color, lw in [
+            ("Temperature", "Temperatura (°C)", "tab:red", 2),
+            ("pH", "pH", "#8B5CF6", 3),  # Morado brillante y línea más gruesa
+            ("Conductivity", "Conductividad (mS/cm)", "#F59E0B", 3),  # Amarillo fuerte y línea más gruesa
+            ("Water Level", "Nivel Agua (cm)", "tab:cyan", 2),
+        ]:
+            if len(self.sensor_history[key]) > 0:
+                self.ax.plot(x, self.sensor_history[key], label=label, color=color, linewidth=lw)
+        self.ax.legend(loc="upper left")
+        self.ax.set_xlabel("Tiempo (min)")
+        self.ax.set_ylabel("Valor")
+        self.ax.grid(True, alpha=0.3)
+        self.fig.tight_layout()
+        self.canvas.draw()
 
     def set_arduino_controller(self, controller):
         """Set the Arduino controller for this dashboard"""
@@ -115,11 +142,31 @@ class Dashboard:
             if sensor_key in sensor_data and display_key in self.stats_labels:
                 value = sensor_data[sensor_key]
                 if isinstance(value, (int, float)):
-                    formatted_value = f"{value:.1f} {unit}" if unit else f"{value:.1f}"
+                    formatted_value = f"{display_key}: {value:.2f} {unit}" if unit else f"{display_key}: {value:.2f}"
                 else:
-                    formatted_value = str(value)
+                    formatted_value = f"{display_key}: {str(value)}"
                 
                 self.stats_labels[display_key].configure(text=formatted_value)
+        
+        # Actualizar historial de sensores para la gráfica
+        # Se asume que cada llamada es una nueva medición
+        # Ahora x representa minutos simulados
+        self.sensor_history["x"].append(len(self.sensor_history["x"]))
+        for key, display_key in [
+            ("temperature", "Temperature"),
+            ("ph", "pH"),
+            ("ec", "Conductivity"),
+            ("water_level", "Water Level"),
+        ]:
+            value = sensor_data.get(key)
+            if isinstance(value, (int, float)):
+                self.sensor_history[display_key].append(value)
+            else:
+                self.sensor_history[display_key].append(float("nan"))
+        # Limitar historial a 20 puntos
+        for k in self.sensor_history:
+            self.sensor_history[k] = self.sensor_history[k][-20:]
+        self._update_chart()
         
         # Update connection status
         self.update_connection_status()
@@ -192,36 +239,6 @@ class Dashboard:
         
         return card, value_label
 
-    def _resize_image(self, event):
-        """Resize image when container size changes"""
-        if self.original_image and event.width > 50 and event.height > 50:
-            try:
-                # Calculate image size maintaining aspect ratio
-                available_width = event.width - 20  # Account for padding
-                available_height = event.height - 20
-                
-                # Calculate aspect ratio
-                img_width, img_height = self.original_image.size
-                aspect_ratio = img_width / img_height
-                
-                # Calculate new size maintaining aspect ratio
-                if available_width / aspect_ratio <= available_height:
-                    new_width = available_width
-                    new_height = int(available_width / aspect_ratio)
-                else:
-                    new_height = available_height
-                    new_width = int(available_height * aspect_ratio)
-                
-                # Update CTkImage size
-                self.ctk_image = ctk.CTkImage(
-                    light_image=self.original_image,
-                    dark_image=self.original_image,
-                    size=(new_width, new_height)
-                )
-                self.image_label.configure(image=self.ctk_image)
-            except Exception as e:
-                print(f"Error resizing image: {e}")
-
     def get_frame(self):
         """Return the main frame for embedding in other components"""
         return self.frame
@@ -232,4 +249,21 @@ class Dashboard:
             sensor_data = self.arduino_controller.read_sensors()
             if sensor_data:
                 self.update_sensor_display(sensor_data)
+
+    def load_simulation_data(self):
+        """Carga datos de simulación para previsualizar el dashboard"""
+        # Simula historial de 15 mediciones con valores diferenciados y claros
+        for i in range(15):
+            data = {
+                "temperature": 20.0 + i * 0.7,      # 20.0, 20.7, ..., 29.8
+                "ph": 5.5 + (i * 0.1),              # 5.5, 5.6, ..., 7.0
+                "ec": 1.0 + (i * 0.15),             # 1.0, 1.15, ..., 3.1
+                "water_level": 15.0 - i * 0.5,      # 15.0, 14.5, ..., 7.5
+                "humidity": 50.0 + (i % 5),         # 50, 51, ..., 54
+                "voltage": 12.0 + (i % 3) * 0.1,    # 12.0, 12.1, 12.2, ...
+                "status": "ok"
+            }
+            self.update_sensor_display(data)
+        # Muestra una alerta de simulación
+        self.show_alert("Simulación de datos activa", "low")
 

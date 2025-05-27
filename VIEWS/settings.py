@@ -81,8 +81,13 @@ class CustomView:
         ).pack(side="left", padx=5)
 
         ctk.CTkButton(
+<<<<<<< HEAD
             btn_frame, text="Ajustar Intensidad", fg_color=COLORS.danger,
             text_color="white", command=self.adjust_intensity, font=ctk.CTkFont(size=16, weight="bold"), height=38
+=======
+            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.button_intensity,  # Cambiado a azul claro
+            text_color="white", command=self.adjust_intensity
+>>>>>>> 1487bbbe019e4ad6caa7cb8484053192d5148149
         ).pack(side="left", padx=5)
 
     def _create_labeled_range(self, parent, label, validate_command):
