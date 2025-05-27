@@ -72,8 +72,9 @@ class Dashboard:
         self.chart_frame = chart_section
         self._init_chart(chart_section)
 
-        # Si no hay controlador, cargar datos de simulación para mostrar el diseño
-        self.load_simulation_data()
+        # Si no hay controlador, no cargar datos de simulación
+        if self.arduino_controller:
+            self.refresh_data()
 
     def _init_chart(self, parent):
         """Inicializa la gráfica de sensores"""
@@ -99,6 +100,10 @@ class Dashboard:
             self.ax.set_title("Esperando datos de sensores...")
             self.canvas.draw()
             return
+        
+        # Variables para calcular los límites dinámicos del eje Y
+        all_values = []
+
         # Graficar cada sensor si hay datos
         for key, label, color, lw in [
             ("Temperature", "Temperatura (°C)", "tab:red", 2),
@@ -107,11 +112,20 @@ class Dashboard:
             ("Water Level", "Nivel Agua (cm)", "tab:cyan", 2),
         ]:
             if len(self.sensor_history[key]) > 0:
-                self.ax.plot(x, self.sensor_history[key], label=label, color=color, linewidth=lw)
+                self.ax.plot(x, self.sensor_history[key], label=label, color=color, linewidth=lw, marker='o')
+                all_values.extend(self.sensor_history[key])  # Agregar valores para calcular límites
+
+        # Ajustar límites del eje Y dinámicamente
+        if all_values:
+            min_y = min(all_values) - 1  # Margen inferior
+            max_y = max(all_values) + 1  # Margen superior
+            self.ax.set_ylim(min_y, max_y)
+
         self.ax.legend(loc="upper left")
         self.ax.set_xlabel("Tiempo (min)")
         self.ax.set_ylabel("Valor")
         self.ax.grid(True, alpha=0.3)
+        self.ax.set_xlim(left=max(0, len(x) - 20), right=len(x))  # Avanzar conforme llegan datos
         self.fig.tight_layout()
         self.canvas.draw()
 
@@ -150,7 +164,6 @@ class Dashboard:
         
         # Actualizar historial de sensores para la gráfica
         # Se asume que cada llamada es una nueva medición
-        # Ahora x representa minutos simulados
         self.sensor_history["x"].append(len(self.sensor_history["x"]))
         for key, display_key in [
             ("temperature", "Temperature"),
@@ -249,21 +262,4 @@ class Dashboard:
             sensor_data = self.arduino_controller.read_sensors()
             if sensor_data:
                 self.update_sensor_display(sensor_data)
-
-    def load_simulation_data(self):
-        """Carga datos de simulación para previsualizar el dashboard"""
-        # Simula historial de 15 mediciones con valores diferenciados y claros
-        for i in range(15):
-            data = {
-                "temperature": 20.0 + i * 0.7,      # 20.0, 20.7, ..., 29.8
-                "ph": 5.5 + (i * 0.1),              # 5.5, 5.6, ..., 7.0
-                "ec": 1.0 + (i * 0.15),             # 1.0, 1.15, ..., 3.1
-                "water_level": 15.0 - i * 0.5,      # 15.0, 14.5, ..., 7.5
-                "humidity": 50.0 + (i % 5),         # 50, 51, ..., 54
-                "voltage": 12.0 + (i % 3) * 0.1,    # 12.0, 12.1, 12.2, ...
-                "status": "ok"
-            }
-            self.update_sensor_display(data)
-        # Muestra una alerta de simulación
-        self.show_alert("Simulación de datos activa", "low")
 
