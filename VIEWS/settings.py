@@ -14,7 +14,7 @@ class CustomView:
 
         # Header
         ctk.CTkLabel(
-            self.frame, text="⚙️ Settings", font=ctk.CTkFont(size=28, weight="bold"),
+            self.frame, text="⚙️ Configuración", font=ctk.CTkFont(size=28, weight="bold"),
             text_color=COLORS.text_dark
         ).pack(pady=20)
 

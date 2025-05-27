@@ -35,10 +35,10 @@ class Sidebar:
         self.nav_frame.pack(fill="x", pady=20)
         
         self.nav_items = [
-            {"icon": "🏠", "text": "Home", "view": "home"},
-            {"icon": "📊", "text": "History", "view": "history"},
-            {"icon": "🔔", "text": "Notify", "view": "notifications"},
-            {"icon": "⚙️", "text": "Settings", "view": "custom"}
+            {"icon": "🏠", "text": "Inicio", "view": "home"},
+            {"icon": "📊", "text": "Historial", "view": "history"},
+            {"icon": "🔔", "text": "Notificaciones", "view": "notifications"},
+            {"icon": "⚙️", "text": "Configuración", "view": "custom"}
         ]
         
         self.nav_buttons = []

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from customtkinter import CTkImage
 from PIL import Image, ImageTk
 import os
 from VIEWS.colors import COLORS
@@ -36,10 +37,10 @@ class Dashboard:
         self.stats_help_buttons = {}
 
         stats_data = [
-            {"title": "Temperature", "value": "Waiting...", "icon": "🌡️", "color": COLORS.primary, "help_key": "temperature"},
-            {"title": "pH", "value": "Waiting...", "icon": "🧪", "color": COLORS.secondary, "help_key": "ph"},
-            {"title": "Conductivity", "value": "Waiting...", "icon": "⚡", "color": "#F59E0B", "help_key": "ec"},
-            {"title": "Water Level", "value": "Waiting...", "icon": "🧊", "color": "#3B82F6", "help_key": "water_level"},
+            {"title": "Temperatura", "value": "Esperando...", "icon": "🌡️", "color": COLORS.primary, "help_key": "temperature"},
+            {"title": "pH", "value": "Esperando...", "icon": "🧪", "color": COLORS.secondary, "help_key": "ph"},
+            {"title": "Conductividad", "value": "Esperando...", "icon": "⚡", "color": "#F59E0B", "help_key": "ec"},
+            {"title": "Nivel de Agua", "value": "Esperando...", "icon": "🧊", "color": "#3B82F6", "help_key": "water_level"},
         ]
 
         for stat in stats_data:
@@ -48,7 +49,7 @@ class Dashboard:
             self.stats_labels[stat["title"]] = value_label
             self.stats_help_buttons[stat["title"]] = help_btn
 
-        # Middle section for status and alerts (fixed height)
+        # Sección intermedia para estado y alertas (altura fija)
         middle_section = ctk.CTkFrame(main_container, fg_color="transparent", height=60)
         middle_section.pack(fill="x", pady=(0, 10))
         middle_section.pack_propagate(False)  # Maintain fixed height
@@ -162,26 +163,25 @@ class Dashboard:
         
         # Map sensor data to display labels
         display_mapping = {
-            "temperature": ("Temperature", "°C"),
+            "temperature": ("Temperatura", "°C"),
             "ph": ("pH", ""),
-            "ec": ("Conductivity", "mS/cm"),
-            "water_level": ("Water Level", "cm"),
-            "humidity": ("Humidity", "%"),
-            "voltage": ("Voltage", "V")
+            "ec": ("Conductividad", "mS/cm"),
+            "water_level": ("Nivel de Agua", "cm"),
+            # Elimina claves no utilizadas como "humidity" y "voltage"
         }
         
         for sensor_key, (display_key, unit) in display_mapping.items():
             if sensor_key in sensor_data and display_key in self.stats_labels:
                 value = sensor_data[sensor_key]
                 if isinstance(value, (int, float)):
-                    formatted_value = f"{display_key}: {value:.2f} {unit}" if unit else f"{display_key}: {value:.2f}"
+                    formatted_value = f"{value:.2f} {unit}" if unit else f"{value:.2f}"
                 else:
-                    formatted_value = f"{display_key}: {str(value)}"
+                    formatted_value = str(value)
                 
+                # Actualiza la etiqueta correspondiente
                 self.stats_labels[display_key].configure(text=formatted_value)
         
         # Actualizar historial de sensores para la gráfica
-        # Se asume que cada llamada es una nueva medición
         self.sensor_history["x"].append(len(self.sensor_history["x"]))
         for key, display_key in [
             ("temperature", "Temperature"),
@@ -246,6 +246,9 @@ class Dashboard:
         self.connection_status.configure(text=status_text, text_color=text_color)
 
     def _create_card(self, parent, title, value, icon, color, help_key):
+        # Convert icon to CTkImage if it's an image file
+        if isinstance(icon, str) and os.path.isfile(icon):
+            icon = CTkImage(Image.open(icon), size=(16, 16))  # Adjust size as needed
         # Corrige el icono de conductividad a ⚡
         if title == "Conductivity":
             icon = "⚡"
@@ -291,7 +294,7 @@ class Dashboard:
     def show_help_modal(self, key):
         help_texts = {
             "ph": "Indica si la solución nutritiva es ácida o alcalina que alimenta a las plantas.",
-            "temperature": "Mide el calor del ambiente o del agua, clave para el crecimiento.",
+            "temperature": "    Mide el calor del ambiente o del agua, \n     clave para el crecimiento.",
             "ec": "La electroconductividad (EC) mide la concentración de sales y nutrientes disueltas en el agua.",
             "water_level": "El nivel de agua óptimo asegura que las raíces estén bien hidratadas y oxigenadas.",
         }

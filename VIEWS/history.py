@@ -15,21 +15,21 @@ class History:
 
         # Datos de ejemplo
         self.datos = [
-            ["Monday", "08:00", "22.5", "6.2", "1300"],
-            ["Monday", "12:00", "24.1", "6.3", "1400"],
-            ["Tuesday", "08:00", "21.8", "6.1", "1250"],
-            ["Tuesday", "12:00", "23.0", "6.4", "1350"],
-            ["Wednesday", "09:00", "22.0", "6.2", "1320"],
-            ["Thursday", "10:00", "22.8", "6.5", "1330"],
-            ["Friday", "11:00", "23.2", "6.3", "1380"],
-            ["Friday", "13:00", "23.6", "6.2", "1420"],
+            ["26-05-2025", "08:00", "22.5", "6.2", "1300"],
+            ["26-05-2025", "12:00", "24.1", "6.3", "1400"],
+            ["27-05-2025", "08:00", "21.8", "6.1", "1250"],
+            ["27-05-2025", "12:00", "23.0", "6.4", "1350"],
+            ["28-05-2025", "09:00", "22.0", "6.2", "1320"],
+            ["29-05-2025", "10:00", "22.8", "6.5", "1330"],
+            ["30-05-2025", "11:00", "23.2", "6.3", "1380"],
+            ["30-05-2025", "13:00", "23.6", "6.2", "1420"],
         ]
 
         self.aplicar_filtro()
 
     def _crear_header(self):
         ctk.CTkLabel(
-            self.frame, text="📊 History", font=ctk.CTkFont(size=22, weight="bold"),
+            self.frame, text="📊 Historial", font=ctk.CTkFont(size=22, weight="bold"),
             text_color=COLORS.text_dark
         ).pack(pady=20)
 
@@ -45,7 +45,7 @@ class History:
 
         # Elimina el filtro de día de la semana
         # self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        self.hora_opciones = ["All"] + [f"{(h % 12) or 12}:00 {'AM' if h < 12 else 'PM'}" for h in range(0, 24)]
+        self.hora_opciones = ["Todo"] + [f"{(h % 12) or 12}:00 {'AM' if h < 12 else 'PM'}" for h in range(0, 24)]
 
         filtros_y_boton = ctk.CTkFrame(filtro_frame, fg_color="transparent")
         filtros_y_boton.pack(padx=10, pady=10, fill="x")
@@ -68,7 +68,7 @@ class History:
         # Calendario para seleccionar fecha (si está disponible)
         cal_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
         cal_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        ctk.CTkLabel(cal_frame, text="Date", text_color=COLORS.text_dark).pack()
+        ctk.CTkLabel(cal_frame, text="Fecha", text_color=COLORS.text_dark).pack()
         if self.tkcalendar_available:
             self.fecha_filtro = DateEntry(
                 cal_frame,
@@ -91,18 +91,18 @@ class History:
             sub_frame.grid(row=0, column=col, padx=5, pady=5, sticky="nsew")
             ctk.CTkLabel(sub_frame, text=label_text, text_color=COLORS.text_dark).pack()
             combo = ttk.Combobox(sub_frame, values=opciones, state="readonly", width=18)
-            combo.set("All")
+            combo.set("Todo")
             combo.pack(ipady=6, fill="x",padx=4)
             return combo
 
-        self.hora_inicio = crear_filtro("From", self.hora_opciones, 1)
-        self.hora_fin = crear_filtro("To", self.hora_opciones, 2)
+        self.hora_inicio = crear_filtro("Desde", self.hora_opciones, 1)
+        self.hora_fin = crear_filtro("Hasta", self.hora_opciones, 2)
 
         # Botón de filtro
         boton_frame = ctk.CTkFrame(filtros_y_boton, fg_color="transparent")
         boton_frame.grid(row=0, column=3, padx=10, pady=(18, 0), sticky="nsew")
         ctk.CTkButton(
-            boton_frame, text="🔍 Filter", fg_color=COLORS.primary, text_color="white",
+            boton_frame, text="🔍 Filtrar", fg_color=COLORS.primary, text_color="white",
             command=self.aplicar_filtro
         ).pack()
 
@@ -122,18 +122,18 @@ class History:
         pag_frame.pack(pady=(0, 20))
 
         self.btn_anterior = ctk.CTkButton(
-            pag_frame, text="⬅ Previous", fg_color=COLORS.secondary, text_color="white",
+            pag_frame, text="⬅ Anterior", fg_color=COLORS.secondary, text_color="white",
             command=self.ir_anterior
         )
         self.btn_anterior.pack(side="left", padx=10)
 
         self.pagina_label = ctk.CTkLabel(
-            pag_frame, text="Page 1", text_color=COLORS.text_dark
+            pag_frame, text="Página 1", text_color=COLORS.text_dark
         )
         self.pagina_label.pack(side="left", padx=10)
 
         self.btn_siguiente = ctk.CTkButton(
-            pag_frame, text="Next ➡", fg_color=COLORS.primary, text_color="white",
+            pag_frame, text="Siguiente ➡", fg_color=COLORS.primary, text_color="white",
             command=self.ir_siguiente
         )
         self.btn_siguiente.pack(side="left", padx=10)
@@ -152,9 +152,9 @@ class History:
             # dia_match = (dia == "All" or row[0] == dia)
             fecha_match = True  # Cambia esto si agregas la fecha a tus datos
             hora_match = True
-            if hora_inicio != "All" and row[1] < hora_inicio:
+            if hora_inicio != "Todo" and row[1] < hora_inicio:
                 hora_match = False
-            if hora_fin != "All" and row[1] > hora_fin:
+            if hora_fin != "Todo" and row[1] > hora_fin:
                 hora_match = False
 
             # if dia_match and fecha_match and hora_match:
@@ -168,7 +168,7 @@ class History:
         for widget in self.table_container.winfo_children():
             widget.destroy()
 
-        headers = ["📅 Day", "⏰ Hour", "🌡️ Temp. (°C)", "🧪 pH", "⚡ Conduct. (µS/cm)"]
+        headers = ["📅 Fecha", "⏰ Hora", "🌡️ Temp. (°C)", "🧪 pH", "⚡ Conduct. (µS/cm)"]
         header_frame = ctk.CTkFrame(self.table_container, fg_color=COLORS.primary)
         header_frame.pack(fill="x", pady=(0, 8), padx=4)
 
@@ -198,7 +198,7 @@ class History:
                 ).grid(row=0, column=i, padx=2, sticky="nsew")
 
         total_paginas = max(1, (len(self.datos_filtrados) + self.filas_por_pagina - 1) // self.filas_por_pagina)
-        self.pagina_label.configure(text=f"Page {self.pagina_actual + 1} de {total_paginas}")
+        self.pagina_label.configure(text=f"Página {self.pagina_actual + 1} de {total_paginas}")
         self.btn_anterior.configure(state="normal" if self.pagina_actual > 0 else "disabled")
         self.btn_siguiente.configure(state="normal" if self.pagina_actual < total_paginas - 1 else "disabled")
 
