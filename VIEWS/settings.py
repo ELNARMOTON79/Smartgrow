@@ -14,7 +14,7 @@ class CustomView:
 
         # Header
         ctk.CTkLabel(
-            self.frame, text="Settings", font=ctk.CTkFont(size=28, weight="bold"),
+            self.frame, text="⚙️ Settings", font=ctk.CTkFont(size=28, weight="bold"),
             text_color=COLORS.text_dark
         ).pack(pady=20)
 
@@ -24,7 +24,12 @@ class CustomView:
         # --- Etiquetas con signo de interrogación y ayuda ---
         label_frame_ph = ctk.CTkFrame(content, fg_color=COLORS.background)
         label_frame_ph.pack(pady=(10, 0))
-        ctk.CTkLabel(label_frame_ph, text="pH ideal:", text_color=COLORS.text_dark, font=ctk.CTkFont(size=18, weight="bold")).pack(side="left")
+        ctk.CTkLabel(
+            label_frame_ph,
+            text="🧪 pH ideal:",
+            text_color=COLORS.text_dark,
+            font=ctk.CTkFont(size=18, weight="bold")
+        ).pack(side="left")
         ctk.CTkButton(
             label_frame_ph, text="❓", width=28, height=28, fg_color=COLORS.primary, text_color="white",
             font=ctk.CTkFont(size=18, weight="bold"),
@@ -35,7 +40,12 @@ class CustomView:
 
         label_frame_temp = ctk.CTkFrame(content, fg_color=COLORS.background)
         label_frame_temp.pack(pady=(10, 0))
-        ctk.CTkLabel(label_frame_temp, text="Temperatura ideal (°C):", text_color=COLORS.text_dark, font=ctk.CTkFont(size=18, weight="bold")).pack(side="left")
+        ctk.CTkLabel(
+            label_frame_temp,
+            text="🌡️ Temperatura ideal (°C):",
+            text_color=COLORS.text_dark,
+            font=ctk.CTkFont(size=18, weight="bold")
+        ).pack(side="left")
         ctk.CTkButton(
             label_frame_temp, text="❓", width=28, height=28, fg_color=COLORS.primary, text_color="white",
             font=ctk.CTkFont(size=18, weight="bold"),
@@ -46,7 +56,12 @@ class CustomView:
 
         label_frame_ec = ctk.CTkFrame(content, fg_color=COLORS.background)
         label_frame_ec.pack(pady=(10, 0))
-        ctk.CTkLabel(label_frame_ec, text="Electroconductividad ideal (μS/cm):", text_color=COLORS.text_dark, font=ctk.CTkFont(size=18, weight="bold")).pack(side="left")
+        ctk.CTkLabel(
+            label_frame_ec,
+            text="⚡ Electroconductividad ideal (μS/cm):",
+            text_color=COLORS.text_dark,
+            font=ctk.CTkFont(size=18, weight="bold")
+        ).pack(side="left")
         ctk.CTkButton(
             label_frame_ec, text="❓", width=28, height=28, fg_color=COLORS.primary, text_color="white",
             font=ctk.CTkFont(size=18, weight="bold"),
@@ -81,13 +96,8 @@ class CustomView:
         ).pack(side="left", padx=5)
 
         ctk.CTkButton(
-<<<<<<< HEAD
-            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.danger,
-            text_color="white", command=self.adjust_intensity, font=ctk.CTkFont(size=16, weight="bold"), height=38
-=======
-            btn_frame, text="Ajustar Intensidad", fg_color=COLORS.button_intensity,  # Cambiado a azul claro
-            text_color="white", command=self.adjust_intensity
->>>>>>> 1487bbbe019e4ad6caa7cb8484053192d5148149
+                btn_frame, text="Ajustar Intensidad", fg_color=COLORS.button_intensity,  # Cambiado a azul claro
+                text_color="white", command=self.adjust_intensity
         ).pack(side="left", padx=5)
 
     def _create_labeled_range(self, parent, label, validate_command):
@@ -256,7 +266,7 @@ class CustomView:
             "info": ("🛈", "#2563eb"),
             "question": ("❓", "#f59e0b"),
         }
-        icon_char, icon_color = icon_map.get(icon, ("🛈", "#2563eb"))
+        icon_char, icon_color = icon_map.get(icon, ("🧪", "#10b981"))
         icon_label = ctk.CTkLabel(row, text=icon_char, font=ctk.CTkFont(size=48, weight="bold"), text_color=icon_color)
         icon_label.pack(side="left", padx=(0, 18))
 
