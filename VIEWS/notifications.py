@@ -6,6 +6,8 @@ from PIL import Image
 import os
 import pygame
 import threading
+from os import path
+from notifypy import Notify
 
 class Notifications:
     def __init__(self, parent, custom_view=None):
@@ -39,6 +41,18 @@ class Notifications:
                 self.alert_sound = pygame.mixer.Sound(sound_path)
         except Exception as e:
             print(f"Error loading alert sound: {e}")
+        
+        # Usa el icono correcto para notifypy
+        self.notifypy_icon = path.abspath(
+            path.join(os.path.dirname(os.path.dirname(__file__)), "Sources", "logonoti.png")
+        )
+        self.notifypy_audio = path.abspath(
+            path.join(os.path.dirname(os.path.dirname(__file__)), "audio", "sonidonoti.wav")
+        )
+        if not os.path.exists(self.notifypy_icon):
+            self.notifypy_icon = None
+        if not os.path.exists(self.notifypy_audio):
+            self.notifypy_audio = None
         
         # Title
         title_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
@@ -135,10 +149,30 @@ class Notifications:
         sound_thread = threading.Thread(target=play_sound, daemon=True)
         sound_thread.start()
 
+    def send_notifypy_notification(self, alert_data):
+        """Envía una notificación de escritorio usando notifypy con formato visual como la imagen"""
+        notification = Notify()
+        notification.title = "Smartgrow"
+        if alert_data.get("sensor") and alert_data.get("value"):
+            msg = f"{alert_data['sensor'].capitalize()}: {alert_data['value']}"
+        else:
+            msg = alert_data.get("message", "Alerta Smartgrow")
+        notification.message = msg
+
+        if self.notifypy_icon:
+            notification.icon = self.notifypy_icon
+        if self.notifypy_audio:
+            notification.audio = self.notifypy_audio
+
+        notification.send()
+
     def handle_alert(self, alert_data: Dict):
         """Handle new alert from Arduino controller"""
         # Play alert sound
         self.play_alert_sound()
+        
+        # Enviar notificación de escritorio tipo notifypy
+        self.send_notifypy_notification(alert_data)
         
         # Add to history
         self.alerts_history.insert(0, alert_data)

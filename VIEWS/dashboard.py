@@ -280,7 +280,7 @@ class Dashboard:
         # Ajusta el tamaño de letra solo para temperatura
         font_size = 16 if key == "temperature" else 18
         self._show_modal(
-            title="¿Qué es?",
+            title="Definición de Sensor",
             message=help_texts.get(key, "Sin información disponible."),
             icon=help_icons.get(key, "🛈"),
             msg_font_size=font_size
