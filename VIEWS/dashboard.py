@@ -314,12 +314,24 @@ class Dashboard:
         )
 
     def _show_modal(self, title, message, icon="🛈", msg_font_size=18):
-        if self._modal is not None:
-            try:
-                self._modal.destroy()
-            except Exception:
-                pass
-        modal = ctk.CTkToplevel(self.frame)
+        # Compatibilidad para Raspberry Pi: usa Toplevel solo si hay entorno gráfico
+        try:
+            modal = ctk.CTkToplevel(self.frame)
+        except Exception:
+            # Fallback: usa ventana simple de Tkinter si falla CTkToplevel (por ejemplo, en algunos entornos de Pi)
+            import tkinter as tk
+            modal = tk.Toplevel(self.frame)
+            modal.title(title)
+            modal.geometry("440x200")
+            label = tk.Label(modal, text=f"{icon} {title}\n\n{message}", font=("Arial", msg_font_size, "bold"), justify="left", wraplength=320)
+            label.pack(expand=True, fill="both", padx=20, pady=20)
+            btn = tk.Button(modal, text="Cerrar", command=modal.destroy, font=("Arial", 14, "bold"), width=12)
+            btn.pack(pady=10)
+            modal.grab_set()
+            modal.transient(self.frame)
+            modal.wait_window()
+            return
+
         self._modal = modal
         modal.title(title)
         modal.geometry("440x200")
@@ -347,7 +359,6 @@ class Dashboard:
         icon_label = ctk.CTkLabel(row, text=icon_char, font=ctk.CTkFont(size=48, weight="bold"), text_color=icon_color)
         icon_label.pack(side="left", padx=(0, 18))
 
-        # Letra más pequeña para que se vea bien el texto
         msg = ctk.CTkLabel(
             row, text=message,
             font=ctk.CTkFont(size=13, weight="bold"),

@@ -101,7 +101,7 @@ class App(ctk.CTk):
                     "max": parse_float(settings["EC"]["max"])
                 }
             }
-            print("Configuración ideal guardada:", self.ideal_settings)
+            print("Configuración ideal guardada:", self.ideal_settingitgs)
         except Exception as e:
             print(f"Error al guardar configuración ideal: {e}")
 
