@@ -2,6 +2,7 @@ import customtkinter as ctk
 from VIEWS.colors import COLORS
 import tkinter.ttk as ttk 
 import datetime
+from base_datos.contacto import obtener_todos, filtrar_por_fecha, filtrar_por_hora
 
 class History:
     def __init__(self, parent):
@@ -13,19 +14,14 @@ class History:
         self._crear_tabla()
         self._crear_paginacion()
 
-        # Datos de ejemplo
-        self.datos = [
-            ["26-05-2025", "08:00", "22.5", "6.2", "1300"],
-            ["26-05-2025", "12:00", "24.1", "6.3", "1400"],
-            ["27-05-2025", "08:00", "21.8", "6.1", "1250"],
-            ["27-05-2025", "12:00", "23.0", "6.4", "1350"],
-            ["28-05-2025", "09:00", "22.0", "6.2", "1320"],
-            ["29-05-2025", "10:00", "22.8", "6.5", "1330"],
-            ["30-05-2025", "11:00", "23.2", "6.3", "1380"],
-            ["30-05-2025", "13:00", "23.6", "6.2", "1420"],
-        ]
+        # Obtiene los datos dinámicamente desde contacto.obtener_todos()
+        self.datos = self.obtener_datos()
 
         self.aplicar_filtro()
+
+    def obtener_datos(self):
+        # Llama al método obtener_todos para obtener los datos desde la base de datos
+        return obtener_todos()
 
     def _crear_header(self):
         ctk.CTkLabel(
@@ -43,9 +39,8 @@ class History:
         filtro_frame = ctk.CTkFrame(self.frame, fg_color=COLORS.background, corner_radius=10)
         filtro_frame.pack(fill="x", padx=20, pady=(0, 15))
 
-        # Elimina el filtro de día de la semana
-        # self.dia_opciones = ["All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        self.hora_opciones = ["Todo"] + [f"{(h % 12) or 12}:00 {'AM' if h < 12 else 'PM'}" for h in range(0, 24)]
+        # Update hour options to 24-hour format
+        self.hora_opciones = ["Todo"] + [f"{h:02}:00" for h in range(0, 24)]
 
         filtros_y_boton = ctk.CTkFrame(filtro_frame, fg_color="transparent")
         filtros_y_boton.pack(padx=10, pady=10, fill="x")
@@ -109,7 +104,8 @@ class History:
 
 
     def _crear_tabla(self):
-        self.table_container = ctk.CTkFrame(
+        # Ensure the table container is a proper widget object
+        self.table_container = ctk.CTkScrollableFrame(
             self.frame, fg_color=COLORS.background, corner_radius=10
         )
         self.table_container.pack(fill="both", expand=True, padx=20, pady=(0, 10))
@@ -139,27 +135,37 @@ class History:
         self.btn_siguiente.pack(side="left", padx=10)
 
     def aplicar_filtro(self):
-        # Elimina la referencia al filtro de día de la semana
-        # dia = self.dia_filtro.get()
         fecha = self.fecha_filtro.get() if self.fecha_filtro else None
         hora_inicio = self.hora_inicio.get()
         hora_fin = self.hora_fin.get()
 
-        self.datos_filtrados = []
+        if fecha and fecha != "Todo":
+            self.datos_filtrados = filtrar_por_fecha(fecha)
+        else:
+            self.datos_filtrados = obtener_todos()
 
-        for row in self.datos:
-            # Elimina el filtro de día de la semana
-            # dia_match = (dia == "All" or row[0] == dia)
-            fecha_match = True  # Cambia esto si agregas la fecha a tus datos
-            hora_match = True
-            if hora_inicio != "Todo" and row[1] < hora_inicio:
-                hora_match = False
-            if hora_fin != "Todo" and row[1] > hora_fin:
-                hora_match = False
+        if hora_inicio != "Todo" or hora_fin != "Todo":
+            # Parse hora_inicio and hora_fin into datetime.time objects
+            hora_inicio = datetime.datetime.strptime(hora_inicio, "%H:%M").time() if hora_inicio != "Todo" else None
+            hora_fin = datetime.datetime.strptime(hora_fin, "%H:%M").time() if hora_fin != "Todo" else None
 
-            # if dia_match and fecha_match and hora_match:
-            if fecha_match and hora_match:
-                self.datos_filtrados.append(row)
+            datos_filtrados_por_hora = []
+            for row in self.datos_filtrados:
+                if len(row) < 2:  # Verifica que el dato tenga al menos 2 columnas (fecha y hora)
+                    continue
+                hora = (datetime.datetime.min + row[1]).time()  # Convert timedelta to time
+                if hora_inicio and hora < hora_inicio:
+                    continue
+                if hora_fin and hora > hora_fin:
+                    continue
+                datos_filtrados_por_hora.append(row)
+            self.datos_filtrados = datos_filtrados_por_hora
+
+        # Asegúrate de que cada fila tenga al menos 5 columnas, rellena con valores vacíos si es necesario
+        self.datos_filtrados = [
+            (row[0], row[1], row[2] if len(row) > 2 else "N/A", row[3] if len(row) > 3 else "N/A", row[4] if len(row) > 4 else "N/A")
+            for row in self.datos_filtrados
+        ]
 
         self.pagina_actual = 0
         self.mostrar_tabla_paginada()

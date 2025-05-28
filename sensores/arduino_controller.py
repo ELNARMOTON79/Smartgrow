@@ -1,6 +1,10 @@
 import serial
 import json
 import threading
+import sys
+sys.path.append('../base_datos')  # Add the database module path
+from base_datos import contacto  # Import the contacto module directly
+from datetime import datetime  # Import datetime to generate timestamps
 
 class ArduinoController:
     def __init__(self, port="COM12", baudrate=9600, timeout=2):
@@ -26,8 +30,23 @@ class ArduinoController:
                 line = self.serial.readline().decode('utf-8').strip()
                 if line.startswith('{') and line.endswith('}'):
                     sensor_data = json.loads(line)
+                    print(f"Datos recibidos del Arduino: {sensor_data}")  # Log the received data
+                    
                     # Guarda los datos en la base de datos
                     self.process_sensor_data(sensor_data)
+                    
+                    # Insertar datos en la base de datos
+                    now = datetime.now()
+                    fecha = now.strftime("%Y-%m-%d")
+                    hora = now.strftime("%H:%M:%S")
+                    temperatura = sensor_data.get("temp_C")  # Use the actual value from 'temp_C'
+                    ph = sensor_data.get("pH")  # Use the actual value from 'pH'
+                    conductividad = sensor_data.get("EC_mS_cm")  # Use the actual value from 'EC_mS_cm'
+                    
+                    # Ensure values are not None before inserting
+                    if temperatura is not None and ph is not None and conductividad is not None:
+                        contacto.crear(fecha, hora, temperatura, ph, conductividad)
+                    
                     return sensor_data
             except Exception as e:
                 print(f"Error reading from Arduino: {e}")
