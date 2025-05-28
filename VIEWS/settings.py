@@ -165,6 +165,8 @@ class CustomView:
                 self.temp_min_entry.get(), self.temp_max_entry.get(),
                 self.ec_min_entry.get(), self.ec_max_entry.get()
             ]
+            # Nueva validación: si todos los campos están vacíos, mostrar mensaje
+        
             if not all(is_float(c) or c == "" for c in campos):
                 self.status_label.configure(text="❌ Todos los valores deben ser numéricos")
                 self.status_label.after(3000, lambda: self.status_label.configure(text=""))

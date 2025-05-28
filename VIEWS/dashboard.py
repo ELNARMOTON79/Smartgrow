@@ -294,7 +294,7 @@ class Dashboard:
     def show_help_modal(self, key):
         help_texts = {
             "ph": "Indica si la solución nutritiva es ácida o alcalina que alimenta a las plantas.",
-            "temperature": "    Mide el calor del ambiente o del agua, \n     clave para el crecimiento.",
+            "temperature": "    Mide el calor del agua, \n     clave para el crecimiento.",
             "ec": "La electroconductividad (EC) mide la concentración de sales y nutrientes disueltas en el agua.",
             "water_level": "El nivel de agua óptimo asegura que las raíces estén bien hidratadas y oxigenadas.",
         }
