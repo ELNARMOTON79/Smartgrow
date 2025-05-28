@@ -83,22 +83,12 @@ class CustomView:
 
         # Botones de control
         btn_frame = ctk.CTkFrame(content, fg_color=COLORS.background)
-        btn_frame.pack(pady=10)
+        btn_frame.pack(pady=20)  # Adjusted padding for better spacing
 
         ctk.CTkButton(
             btn_frame, text="Encender Lámpara", fg_color=COLORS.secondary,
             text_color="white", command=self.toggle_light, font=ctk.CTkFont(size=16, weight="bold"), height=38
-        ).pack(side="left", padx=5)
-
-        ctk.CTkButton(
-            btn_frame, text="Cambiar Espectro", fg_color=COLORS.primary,
-            text_color="white", command=self.change_spectrum, font=ctk.CTkFont(size=16, weight="bold"), height=38
-        ).pack(side="left", padx=5)
-
-        ctk.CTkButton(
-                btn_frame, text="Ajustar Intensidad", fg_color=COLORS.button_intensity,  # Cambiado a azul claro
-                text_color="white", command=self.adjust_intensity
-        ).pack(side="left", padx=5)
+        ).pack(pady=5)  # Centered and added vertical padding
 
     def _create_labeled_range(self, parent, label, validate_command):
         container = ctk.CTkFrame(parent, fg_color=COLORS.background)
@@ -196,12 +186,6 @@ class CustomView:
 
     def toggle_light(self):
         print("Lámpara encendida/apagada")
-
-    def change_spectrum(self):
-        print("Espectro de luz cambiado")
-
-    def adjust_intensity(self):
-        print("Intensidad ajustada")
 
     # Validación para formato x.x (como 6.5)
     def validate_ph_format(self, value):
