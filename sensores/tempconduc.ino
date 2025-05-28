@@ -15,7 +15,7 @@
 // --- Pines para módulo relay ---
 #define RELAY_PERISTALTICA_1 3  // IN1 D3 bajar pH
 #define RELAY_PERISTALTICA_2 4  // IN2 D4 subir pH
-#define RELAY_PERISTALTICA_3 6  // IN5 D6 nutrientes
+#define RELAY_PERISTALTICA_3 6  // IN5 D6 agregar nutrientes (tomates cherry)
 
 // --- Configuración sensores ---
 OneWire oneWire(ONE_WIRE_BUS);
@@ -31,10 +31,10 @@ float calibrationConstant = 1.0;
 #define OFFSET_CALIBRACION_CM 1.5
 #define NIVEL_MINIMO_CM 5.0
 
-// --- Variables para rangos ideales ---
+// --- Rangos ideales ---
 float idealPHMin = 5.5;
 float idealPHMax = 7.5;
-float idealECMin = 1.2;
+float idealECMin = 1.2;  // Ideal para tomates cherry: 1.2–2.5 mS/cm
 float idealECMax = 2.5;
 
 void setup() {
@@ -47,7 +47,6 @@ void setup() {
   pinMode(RELAY_PERISTALTICA_2, OUTPUT);
   pinMode(RELAY_PERISTALTICA_3, OUTPUT);
 
-  // Inicializa relays en estado apagado (HIGH si relays activos en LOW)
   digitalWrite(RELAY_PERISTALTICA_1, HIGH);
   digitalWrite(RELAY_PERISTALTICA_2, HIGH);
   digitalWrite(RELAY_PERISTALTICA_3, HIGH);
@@ -63,8 +62,7 @@ float medirDistancia() {
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-  long duracion = pulseIn(ECHO_PIN, HIGH, 30000); // Timeout: 30ms
-
+  long duracion = pulseIn(ECHO_PIN, HIGH, 30000);
   if (duracion == 0) return -1;
 
   float distancia = duracion * 0.034 / 2;
@@ -73,36 +71,26 @@ float medirDistancia() {
 }
 
 void loop() {
-  // --- Medición de Nivel de Agua ---
   float distancia = medirDistancia();
   float nivelAgua = ALTURA_SENSOR_CM - distancia;
 
   bool alertaNivel = false;
-  if (distancia < 0) {
-    nivelAgua = 0;
+  if (distancia < 0 || nivelAgua < NIVEL_MINIMO_CM) {
     alertaNivel = true;
-  } else {
-    if (nivelAgua < 0) nivelAgua = 0;
-    if (nivelAgua < NIVEL_MINIMO_CM) {
-      alertaNivel = true;
-    }
+    nivelAgua = max(nivelAgua, 0);
   }
 
-  // --- Medición de Temperatura ---
   sensors.requestTemperatures();
   float temperatura = sensors.getTempCByIndex(0);
 
-  // --- Medición de EC ---
   int analogValueEC = analogRead(EC_PIN);
   float voltageEC = (analogValueEC / ADC_RESOLUTION) * VREF;
-  float ecValue = (voltageEC / calibrationConstant) * (1.0 + 0.0185 * (temperatura - 25.0));  // mS/cm
+  float ecValue = (voltageEC / calibrationConstant) * (1.0 + 0.0185 * (temperatura - 25.0));
 
-  // --- Medición de pH ---
   int rawPH = analogRead(PH_PIN);
   float voltagePH = rawPH * (5.0 / 1023.0);
   float phValue = -6.475 * voltagePH + 25.99;
 
-  // --- RESPONDER A COMANDOS POR SERIAL ---
   if (Serial.available()) {
     String cmd = Serial.readStringUntil('\n');
     cmd.trim();
@@ -110,7 +98,6 @@ void loop() {
     if (cmd == "TEST") {
       Serial.println("OK");
     } else if (cmd == "READ_SENSORS") {
-      // Enviar datos en formato JSON
       Serial.print("{");
       Serial.print("\"nivelAgua_cm\":"); Serial.print(nivelAgua, 2); Serial.print(",");
       Serial.print("\"temp_C\":"); Serial.print(temperatura, 2); Serial.print(",");
@@ -120,26 +107,17 @@ void loop() {
       Serial.println("}");
     } else if (cmd.startsWith("ACTIVATE_PUMP")) {
       int pumpNumber = cmd.substring(14).toInt();
-      if (pumpNumber == 1) {
-        digitalWrite(RELAY_PERISTALTICA_1, LOW);
-      } else if (pumpNumber == 2) {
-        digitalWrite(RELAY_PERISTALTICA_2, LOW);
-      } else if (pumpNumber == 3) {
-        digitalWrite(RELAY_PERISTALTICA_3, LOW);
-      }
+      if (pumpNumber == 1) digitalWrite(RELAY_PERISTALTICA_1, LOW);
+      if (pumpNumber == 2) digitalWrite(RELAY_PERISTALTICA_2, LOW);
+      if (pumpNumber == 3) digitalWrite(RELAY_PERISTALTICA_3, LOW);
     } else if (cmd.startsWith("DEACTIVATE_PUMP")) {
       int pumpNumber = cmd.substring(17).toInt();
-      if (pumpNumber == 1) {
-        digitalWrite(RELAY_PERISTALTICA_1, HIGH);
-      } else if (pumpNumber == 2) {
-        digitalWrite(RELAY_PERISTALTICA_2, HIGH);
-      } else if (pumpNumber == 3) {
-        digitalWrite(RELAY_PERISTALTICA_3, HIGH);
-      }
+      if (pumpNumber == 1) digitalWrite(RELAY_PERISTALTICA_1, HIGH);
+      if (pumpNumber == 2) digitalWrite(RELAY_PERISTALTICA_2, HIGH);
+      if (pumpNumber == 3) digitalWrite(RELAY_PERISTALTICA_3, HIGH);
     }
   }
 
-  // --- Salida Serial periódica para monitoreo humano ---
   Serial.print("nivelAgua_cm:");
   Serial.print(nivelAgua, 2);
   Serial.print(",temp_C:");
@@ -151,36 +129,23 @@ void loop() {
   Serial.print(",alertaNivel:");
   Serial.println(alertaNivel ? "1" : "0");
 
-  // --- Control de bombas basado en rangos ideales ---
+  // --- Control automático de bombas ---
+  // pH bajo: subir pH
+  if (phValue < 6.0) digitalWrite(RELAY_PERISTALTICA_2, LOW);
+  else if (phValue > idealPHMax) digitalWrite(RELAY_PERISTALTICA_2, LOW);
+  else digitalWrite(RELAY_PERISTALTICA_2, HIGH);
 
-  // Control de pH (ideal)
-  if (phValue < idealPHMin) {
-    digitalWrite(RELAY_PERISTALTICA_1, LOW);  // Bajar pH
-  } else {
-    digitalWrite(RELAY_PERISTALTICA_1, HIGH);
-  }
+  // pH alto: bajar pH
+  if (phValue > 8.0) digitalWrite(RELAY_PERISTALTICA_1, LOW);
+  else if (phValue < idealPHMin) digitalWrite(RELAY_PERISTALTICA_1, LOW);
+  else digitalWrite(RELAY_PERISTALTICA_1, HIGH);
 
-  if (phValue > idealPHMax) {
-    digitalWrite(RELAY_PERISTALTICA_2, LOW);  // Subir pH
-  } else {
-    digitalWrite(RELAY_PERISTALTICA_2, HIGH);
-  }
-
-  // Control de emergencia por pH fuera de rango crítico
-  if (phValue < 6.0) {
-    digitalWrite(RELAY_PERISTALTICA_2, LOW);  // Subir pH urgentemente
-  }
-
-  if (phValue > 8.0) {
-    digitalWrite(RELAY_PERISTALTICA_1, LOW);  // Bajar pH urgentemente
-  }
-
-  // Control de EC (nutrientes)
+  // EC baja: agregar nutrientes (tomates cherry)
   if (ecValue < idealECMin) {
-    digitalWrite(RELAY_PERISTALTICA_3, LOW);  // Agregar nutrientes
+    digitalWrite(RELAY_PERISTALTICA_3, LOW);
   } else {
     digitalWrite(RELAY_PERISTALTICA_3, HIGH);
   }
 
-  delay(5000);  // Espera entre ciclos
+  delay(5000);
 }
